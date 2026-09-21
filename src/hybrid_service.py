@@ -80,6 +80,38 @@ class HybridPaperService:
         ]
         return self.store.upsert_many(papers, source_query="user-import")
 
+    def import_records(self, records: list[dict]) -> int:
+        """Import normalized paper dictionaries exported from a local database."""
+        from scripts.dblp_fetch import Paper
+
+        papers = []
+        for record in records:
+            title = str(record.get("title") or "").strip()
+            if not title:
+                continue
+            stable_key = str(record.get("dblp_key") or "").strip()
+            if not stable_key:
+                stable_key = "bulk-import:" + hashlib.sha256(
+                    normalize_title(title).encode("utf-8")
+                ).hexdigest()[:24]
+            papers.append(
+                Paper(
+                    title=title,
+                    authors=[str(item) for item in record.get("authors", [])],
+                    venue=record.get("venue"),
+                    year=int(record["year"]) if record.get("year") else None,
+                    doi=record.get("doi"),
+                    dblp_url=record.get("dblp_url"),
+                    electronic_edition=[
+                        str(item) for item in record.get("electronic_edition", [])
+                    ],
+                    dblp_key=stable_key,
+                    paper_type=record.get("paper_type") or "bulk-import",
+                    abstract=record.get("abstract"),
+                    keywords=[str(item) for item in record.get("keywords", [])],
+                )
+            )
+        return self.store.upsert_many(papers, source_query="bulk-import")
     def _respect_rate_limit(self) -> None:
         elapsed = time.monotonic() - self.last_remote_request
         remaining = self.request_sleep - elapsed

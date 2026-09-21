@@ -22,6 +22,17 @@ py -3 app.py --no-online --port 8000
 
 打开 `prototype.html` 即可查看页面。页面从 `http://127.0.0.1:8000` 读取实时分析结果；如果接口未启动，会保留演示数据并给出状态提示。
 
+## 把本地论文迁移到 Render
+
+Render 不能读取本机的 D:\百度网盘。先在本地导出 SQLite 中的完整论文元数据：
+
+    py -3 scripts\export_papers.py --output C:\Temp\visionpulse-papers.json
+
+在 Render 的 Environment 中新增 IMPORT_TOKEN，生成一段随机长字符串。然后在本地执行：
+
+    py -3 scripts\upload_papers.py --input C:\Temp\visionpulse-papers.json --url https://softwarearticlesys.onrender.com --token "你的 IMPORT_TOKEN"
+
+上传接口按批次写入完整元数据，导入后自动重新向量化和聚类。JSON 文件只用于迁移，不要提交到 GitHub。
 ## 数据与统计口径
 
 - DBLP Search API：用于按论文题目进行公开书目检索和缓存。
