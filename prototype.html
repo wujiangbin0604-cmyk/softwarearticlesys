@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VisionPulse · 顶会热词统计交互原型</title>
+<style>
+/* 原型样式：沿用 VisionPulse 深色视觉，所有内容均为演示数据。 */
+:root{--bg:#0b0d18;--side:#101426;--panel:#171b30;--panel2:#1c2340;--line:#303855;--text:#f5f7ff;--muted:#aeb7cf;--cyan:#64e7e0;--violet:#aa8cff;--pink:#ff9cc1;--r:18px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,"Microsoft YaHei",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:99;background:var(--cyan);color:#06121a;padding:8px}
+.shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;background:var(--side);border-right:1px solid var(--line);padding:25px 16px;display:flex;flex-direction:column;z-index:5}.logo{display:flex;align-items:center;gap:10px;padding:0 10px 25px}.logo-icon{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--violet),var(--cyan));color:#0b0d18;font-size:22px;font-weight:900}.logo strong{font-size:18px;letter-spacing:-.04em}.logo small{display:block;color:var(--muted);font-size:11px}.nav-title{margin:12px 10px 7px;color:#7684a5;font-size:11px;letter-spacing:.15em}.nav button{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:0;border-radius:12px;background:transparent;color:var(--muted);text-align:left;margin:2px 0}.nav button:hover,.nav button[aria-current=page]{background:#252d4c;color:white}.nav button[aria-current=page]{box-shadow:inset 3px 0 var(--cyan)}.nav b{font-size:18px;width:23px;text-align:center;font-weight:400}.side-foot{margin-top:auto;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--muted);font-size:12px}.main{min-width:0;padding:26px clamp(18px,4vw,54px) 58px;background:radial-gradient(circle at 90% 0,#232b4e 0,transparent 31%)}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}.topbar small{color:var(--muted)}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #3b5862;color:var(--cyan);border-radius:999px;padding:5px 10px;font-size:12px}.mobile-toggle{display:none}.view{display:none;animation:appear .26s ease}.view.active{display:block}@keyframes appear{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(30px,4.5vw,54px);letter-spacing:-.055em;line-height:1.12;margin:0 0 10px}h2{font-size:21px;margin:0;letter-spacing:-.03em}h3{font-size:15px;margin:0}.lead{color:var(--muted);max-width:720px;margin:0 0 25px}.hero{min-height:245px;border:1px solid #465071;border-radius:24px;padding:35px;background:linear-gradient(90deg,#10172ce6,#11182782),url("./intro-research-bg.png") center/cover;display:flex;flex-direction:column;justify-content:center;margin-bottom:20px}.hero .lead{color:#d8e2f3}.hero h1{max-width:680px}.actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:1px solid #536181;border-radius:11px;padding:10px 15px;background:#232c49;color:#f5f7ff;font-weight:650;transition:transform .15s,background .15s}.btn:hover{transform:translateY(-2px);background:#314064}.btn:active{transform:translateY(1px)}.btn.primary{border-color:transparent;background:linear-gradient(105deg,#7658d9,#a589f1);color:white}.btn.subtle{background:transparent}.btn.danger{border-color:#854560;color:#ffc6d8;background:#382337}.btn:focus-visible,.nav button:focus-visible,.chip:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.card{border:1px solid var(--line);background:#171b30e8;border-radius:var(--r);padding:21px;min-width:0}.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:17px}.card-head p{margin:3px 0 0;color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}.stat{border:1px solid var(--line);border-radius:15px;padding:17px;background:#1a2038}.stat strong{display:block;font-size:27px;letter-spacing:-.05em}.stat span{font-size:12px;color:var(--muted)}.bars{display:grid;gap:9px}.bar{display:grid;grid-template-columns:145px 1fr 40px;align-items:center;gap:12px;font-size:13px}.bar-track{height:9px;background:#2b3452;border-radius:999px;overflow:hidden}.bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--cyan))}.bar b{text-align:right;font-size:12px;color:var(--muted)}.cloud{min-height:310px;display:flex;align-content:center;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}.chip{border:1px solid #4f557d;border-radius:999px;padding:8px 12px;color:#e8e5ff;background:#29264b;transition:.15s}.chip:nth-child(3n){font-size:19px;color:#adf6ed;background:#173e43}.chip:nth-child(4n){color:#ffc5d8;background:#473044}.chip:hover,.chip.active{border-color:var(--cyan);transform:scale(1.05);box-shadow:0 0 18px #64e7e033}.hint{color:var(--muted);font-size:12px}.notice{margin-top:14px;padding:11px 13px;border:1px solid #35535d;background:#183039;color:#b5f8ef;border-radius:10px;font-size:13px}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:16px}.field{border:1px solid var(--line);border-radius:10px;background:#101629;color:var(--text);padding:10px 12px;min-width:0}.toolbar .field[type=search]{flex:1;min-width:200px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:13px}table{width:100%;border-collapse:collapse;min-width:680px}th,td{text-align:left;padding:12px;border-bottom:1px solid #2b3450;vertical-align:top}th{font-size:12px;color:#aeb7cf;background:#20263f}td{font-size:13px}tbody tr:last-child td{border-bottom:0}td small{display:block;color:var(--muted)}.link-btn{border:0;background:transparent;color:var(--cyan);padding:2px 4px}.empty{text-align:center;color:var(--muted);padding:25px}.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}.form-grid label{display:grid;gap:6px;color:var(--muted);font-size:13px}.form-grid .full{grid-column:1/-1}textarea.field{width:100%;min-height:132px;resize:vertical}.form-grid input,.form-grid select{width:100%}.segment{display:flex;gap:6px;border:1px solid var(--line);padding:4px;border-radius:11px;background:#11182b}.segment button{border:0;background:transparent;color:var(--muted);border-radius:8px;padding:7px 12px}.segment button.active{background:#344167;color:white}.chart{height:300px;border-bottom:1px solid #3d4868;background:repeating-linear-gradient(to bottom,transparent 0,transparent 73px,#29334e 74px);position:relative;margin:12px 0 8px}.chart svg{width:100%;height:100%}.chart path.line{fill:none;stroke:var(--cyan);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.chart path.area{fill:#64e7e020}.year-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.legend{display:flex;gap:15px;margin-top:14px;color:var(--muted);font-size:12px}.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--cyan);margin-right:5px}.detail-list{display:grid;gap:12px}.detail-item{padding:14px;border:1px solid var(--line);border-radius:12px;background:#1b2139}.detail-item p{margin:4px 0 0;color:var(--muted);font-size:13px}.modal{position:fixed;inset:0;z-index:30;background:#05070ccc;display:none;place-items:center;padding:16px}.modal.open{display:grid}.dialog{width:min(560px,100%);max-height:90vh;overflow:auto;background:#1a2036;border:1px solid #52607f;border-radius:20px;padding:24px;box-shadow:0 30px 80px #0009}.dialog p{color:var(--muted)}.dialog .form-grid{margin:20px 0}.toast{position:fixed;right:22px;bottom:22px;z-index:50;background:#263a46;border:1px solid var(--cyan);color:white;padding:10px 15px;border-radius:10px;opacity:0;transform:translateY(10px);transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:none}.footer{color:#8793ad;font-size:12px;margin-top:28px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:720px){.shell{display:block}.sidebar{position:fixed;transform:translateX(-100%);transition:.2s;width:250px}.sidebar.open{transform:none}.main{padding:17px 15px 36px}.mobile-toggle{display:block}.hero{padding:25px;min-height:250px}.stats{grid-template-columns:1fr}.bar{grid-template-columns:110px 1fr 32px}.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.card{padding:17px}.topbar{margin-bottom:18px}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳转到主要内容</a>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+  <div class="logo"><div class="logo-icon">✦</div><div><strong>VisionPulse</strong><small>交互原型 · 演示数据</small></div></div>
+  <div class="nav-title">平台页面</div>
+  <nav class="nav" aria-label="原型导航">
+    <button data-page="home" aria-current="page"><b>⌂</b>首页 / 热门方向</button>
+    <button data-page="trends"><b>⌁</b>热度走势对比</button>
+    <button data-page="papers"><b>▤</b>论文列表管理</button>
+    <button data-page="import"><b>↥</b>论文爬取 / 导入</button>
+    <button data-page="about"><b>ⓘ</b>详情 / 关于</button>
+  </nav>
+  <div class="side-foot">此页面用于检查交互流程。论文、统计数字与爬取结果均为原型演示数据。</div>
+</aside>
+<main class="main" id="main">
+  <header class="topbar"><div><button class="btn subtle mobile-toggle" id="menuToggle" aria-label="打开导航">☰</button><small id="breadcrumb">工作台 / 首页</small></div><span class="pill">● 交互原型</span></header>
+  <!-- 页面一：首页和关键词图谱 -->
+  <section class="view active" id="page-home">
+    <div class="hero"><h1>从顶会论文中<br>看见研究的下一步。</h1><p class="lead">聚合 CVPR、ICCV、ECCV 论文，快速识别热门研究方向和关联工作。</p><div class="actions"><button class="btn primary" data-go="trends">查看热度走势</button><button class="btn" data-go="import">导入论文</button></div></div>
+    <div class="stats"><div class="stat"><strong id="paperCount">12</strong><span>原型演示论文</span></div><div class="stat"><strong>3</strong><span>顶级会议</span></div><div class="stat"><strong>2022—2025</strong><span>统计年份</span></div></div>
+    <div class="grid"><div class="card"><div class="card-head"><div><h2>Top 10 热门方向</h2><p>示意热度值，可在正式开发中替换为真实统计</p></div><select class="field" id="homeYear" aria-label="选择年份"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div><div class="bars" id="topBars"></div></div><div class="card"><div class="card-head"><div><h2>关键词图谱</h2><p>点击词条查看相关论文</p></div></div><div class="cloud" id="cloud"></div><p class="hint" id="keywordHint">选择一个关键词，查看关联论文。</p></div></div>
+  </section>
+  <!-- 页面二：热度走势对比 -->
+  <section class="view" id="page-trends">
+    <h1>热度走势对比</h1><p class="lead">选择关键词和会议，观察 2022—2025 年的示意热度变化。播放按钮可演示逐年出现的动画。</p>
+    <div class="card"><div class="toolbar"><label>关键词 <select class="field" id="trendKeyword"></select></label><label>会议 <select class="field" id="trendConference"><option>全部会议</option><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><button class="btn primary" id="playTrend">▶ 播放走势</button></div><div class="chart"><svg id="trendSvg" viewBox="0 0 800 300" preserveAspectRatio="none" role="img" aria-label="热度走势示意图"></svg></div><div class="year-labels"><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div><div class="legend"><span><i></i>示意热度指数</span><span>统计口径将在真实数据导入后确定</span></div></div>
+    <div class="notice">原型交互：更换会议或关键词会刷新曲线；点击“播放走势”按年度逐点绘制。正式版本需基于真实论文数据计算。</div>
+  </section>
+  <!-- 页面三：论文列表管理 -->
+  <section class="view" id="page-papers">
+    <h1>论文列表管理</h1><p class="lead">按标题精确查询，或使用编号、关键词、会议进行模糊查询；支持新增、编辑、删除和查看详情。</p>
+    <div class="card"><div class="toolbar"><input class="field" type="search" id="paperSearch" placeholder="输入题目、编号、关键词或会议" aria-label="搜索论文"><select class="field" id="searchMode" aria-label="查询方式"><option value="fuzzy">模糊查询</option><option value="exact">题目精确查询</option></select><button class="btn primary" id="searchPapers">查询</button><button class="btn" id="addPaper">＋ 新增论文</button></div><div class="table-wrap"><table><thead><tr><th>编号</th><th>论文题目</th><th>会议 / 年份</th><th>关键词</th><th>操作</th></tr></thead><tbody id="paperRows"></tbody></table></div><div id="searchFallback" class="notice" hidden>本地列表未找到匹配论文。<button class="link-btn" id="mockFetch">模拟联网检索</button>（原型仅展示交互，不进行真实爬取）</div></div>
+  </section>
+  <!-- 页面四：单篇录入与批量导入 -->
+  <section class="view" id="page-import">
+    <h1>论文爬取 / 导入</h1><p class="lead">支持单篇题目检索与批量导入。此原型展示输入、确认和结果反馈；正式实现需接入合规数据源。</p>
+    <div class="grid"><div class="card"><div class="card-head"><div><h2>单篇论文</h2><p>输入题目后发起检索</p></div></div><div class="form-grid"><label class="full">论文题目<input class="field" id="singleTitle" placeholder="例如：Learning Visual Representations..."></label><label>会议<select class="field" id="singleConf"><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><label>年份<select class="field" id="singleYear"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></label></div><p><button class="btn primary" id="singleSubmit">检索并加入列表</button></p></div><div class="card"><div class="card-head"><div><h2>批量导入</h2><p>每行一篇论文题目</p></div></div><textarea class="field" id="batchTitles" placeholder="输入或粘贴论文题目，每行一篇"></textarea><p><button class="btn primary" id="batchSubmit">导入论文列表</button></p><p class="hint">原型导入后会生成演示记录；摘要、关键词和原文链接需要真实数据接口提供。</p></div></div><div id="importResult" class="notice" hidden></div>
+  </section>
+  <!-- 页面五：论文详情与项目说明 -->
+  <section class="view" id="page-about">
+    <h1>论文详情 / 关于平台</h1><p class="lead">详情页承接论文列表和关键词图谱的跳转，同时说明平台数据范围与统计口径。</p>
+    <div class="grid"><div class="card"><div class="card-head"><div><h2 id="detailTitle">请选择一篇论文</h2><p id="detailMeta">可从论文列表进入详情</p></div></div><div class="detail-list"><div class="detail-item"><h3>摘要</h3><p id="detailAbstract">原型中的摘要为占位文本；正式版本应显示数据源提供的真实摘要。</p></div><div class="detail-item"><h3>关键词</h3><p id="detailKeywords">—</p></div><div class="detail-item"><h3>原文链接</h3><p id="detailLink">待真实数据源接入</p></div></div></div><div class="card"><h2>关于 VisionPulse</h2><p class="lead" style="margin-top:14px">面向想快速了解计算机视觉研究现状的学习者，聚合 CVPR、ICCV、ECCV 近年论文，通过关键词统计、图谱和年度对比帮助发现方向。</p><div class="detail-list"><div class="detail-item"><h3>数据范围</h3><p>CVPR、ICCV、ECCV，建议 2022 年至今。</p></div><div class="detail-item"><h3>统计口径</h3><p>正式版本需在数据清洗后确定关键词抽取与热度公式，并在博客中公开说明。</p></div><div class="detail-item"><h3>数据来源</h3><p>计划使用会议官网、DBLP 公开接口或课程数据集；此原型不包含真实爬取结果。</p></div></div></div></div>
+  </section>
+  <div class="footer">VisionPulse · 可点击交互原型 · 所有统计及论文条目均为演示数据</div>
+</main>
+</div>
+<!-- 编辑弹窗 -->
+<div class="modal" id="editModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="dialog"><h2 id="modalTitle">新增论文</h2><p>修改后会即时更新原型列表。</p><div class="form-grid"><label class="full">论文题目<input class="field" id="editTitle"></label><label>会议<select class="field" id="editConf"><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><label>年份<select class="field" id="editYear"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></label><label class="full">关键词（用逗号分隔）<input class="field" id="editKeywords"></label></div><div class="actions" style="justify-content:flex-end"><button class="btn subtle" id="cancelEdit">取消</button><button class="btn primary" id="saveEdit">保存论文</button></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* 原型脚本：维护少量演示记录，只验证页面流程，不请求外部接口。 */
+const $=selector=>document.querySelector(selector);
+const $$=selector=>Array.from(document.querySelectorAll(selector));
+const topics=[["Vision-language",92],["3D Gaussian",86],["Diffusion models",80],["Open vocabulary",74],["Video understanding",69],["Foundation model",66],["Segmentation",60],["NeRF",55],["Self-supervised",51],["Robot learning",47]];
+let papers=[
+{id:"P001",title:"Vision-Language Representation for Open-World Understanding",conf:"CVPR",year:"2025",keywords:"Vision-language,Open vocabulary"},
+{id:"P002",title:"3D Gaussian Reconstruction in Dynamic Scenes",conf:"ICCV",year:"2025",keywords:"3D Gaussian,NeRF"},
+{id:"P003",title:"Diffusion Models for Video Generation",conf:"CVPR",year:"2024",keywords:"Diffusion models,Video understanding"},
+{id:"P004",title:"Self-Supervised Segmentation with Foundation Models",conf:"ECCV",year:"2024",keywords:"Self-supervised,Segmentation,Foundation model"},
+{id:"P005",title:"Open Vocabulary Recognition in Complex Scenes",conf:"ICCV",year:"2023",keywords:"Open vocabulary,Vision-language"},
+{id:"P006",title:"Robot Learning from Visual Demonstrations",conf:"CVPR",year:"2022",keywords:"Robot learning,Foundation model"}
+];
+let selectedId=null,editId=null,toastTimer;
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function toast(message){const el=$("#toast");el.textContent=message;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2600)}
+function go(page){$$(".view").forEach(v=>v.classList.toggle("active",v.id==="page-"+page));$$(".nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.page===page?"page":"false"));$("#breadcrumb").textContent="工作台 / "+({home:"首页",trends:"热度走势对比",papers:"论文列表管理",import:"论文爬取 / 导入",about:"详情 / 关于"}[page]);$("#sidebar").classList.remove("open");window.scrollTo({top:0,behavior:"smooth"});if(page==="papers")renderPapers();if(page==="trends")renderTrend()}
+$$("[data-page]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
+$$("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
+$("#menuToggle").onclick=()=>$("#sidebar").classList.toggle("open");
+function renderTopics(){const year=Number($("#homeYear").value);const shift=(year-2025)*4;$("#topBars").innerHTML=topics.map(([name,value])=>'<div class="bar"><span>'+escapeHtml(name)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(20,value+shift)+'%"></div></div><b>'+Math.max(20,value+shift)+'</b></div>').join("");$("#cloud").innerHTML=topics.map(([name])=>'<button class="chip" data-topic="'+escapeHtml(name)+'">'+escapeHtml(name)+'</button>').join("");$$("[data-topic]").forEach(b=>b.onclick=()=>{const topic=b.dataset.topic;$$("[data-topic]").forEach(x=>x.classList.toggle("active",x===b));const count=papers.filter(p=>p.keywords.toLowerCase().includes(topic.toLowerCase())).length;$("#keywordHint").textContent=topic+" · 关联演示论文 "+count+" 篇。点击“查看论文”可进入筛选结果。";if(!$("#keywordView")){const btn=document.createElement("button");btn.id="keywordView";btn.className="btn";btn.textContent="查看论文";$("#keywordHint").after(btn)}$("#keywordView").onclick=()=>{$("#paperSearch").value=topic;go("papers")}})}
+$("#homeYear").onchange=renderTopics;
+function renderPapers(){const q=$("#paperSearch").value.trim().toLowerCase(),exact=$("#searchMode").value==="exact";const list=papers.filter(p=>!q||(exact?p.title.toLowerCase()===q:[p.id,p.title,p.conf,p.year,p.keywords].some(v=>v.toLowerCase().includes(q))));$("#paperRows").innerHTML=list.length?list.map(p=>'<tr><td>'+escapeHtml(p.id)+'</td><td><strong>'+escapeHtml(p.title)+'</strong></td><td>'+escapeHtml(p.conf)+'<small>'+escapeHtml(p.year)+'</small></td><td>'+escapeHtml(p.keywords)+'</td><td><button class="link-btn" data-detail="'+p.id+'">详情</button><button class="link-btn" data-edit="'+p.id+'">编辑</button><button class="link-btn" data-delete="'+p.id+'">删除</button></td></tr>').join(""):'<tr><td colspan="5" class="empty">没有匹配论文，请调整关键词或尝试联网检索。</td></tr>';$("#searchFallback").hidden=!!list.length||!q;$$("[data-detail]").forEach(b=>b.onclick=()=>showDetail(b.dataset.detail));$$("[data-edit]").forEach(b=>b.onclick=()=>openEditor(b.dataset.edit));$$("[data-delete]").forEach(b=>b.onclick=()=>{if(confirm("确定删除这篇论文？")){papers=papers.filter(p=>p.id!==b.dataset.delete);renderPapers();updateCount();toast("论文已删除")}})}
+$("#searchPapers").onclick=renderPapers;$("#paperSearch").onkeydown=e=>{if(e.key==="Enter")renderPapers()};$("#searchMode").onchange=renderPapers;
+$("#mockFetch").onclick=()=>{const q=$("#paperSearch").value.trim();if(!q)return;const p={id:"P"+String(Date.now()).slice(-5),title:q,conf:"CVPR",year:"2025",keywords:"待补充"};papers.unshift(p);renderPapers();updateCount();toast("已添加模拟检索记录；正式版本需接入真实数据源")};
+function updateCount(){$("#paperCount").textContent=papers.length}
+function showDetail(id){const p=papers.find(item=>item.id===id);if(!p)return;selectedId=id;$("#detailTitle").textContent=p.title;$("#detailMeta").textContent=p.conf+" · "+p.year+" · "+p.id;$("#detailKeywords").textContent=p.keywords;$("#detailAbstract").textContent="这是一段用于验证详情页布局的演示摘要。正式版本需从公开论文数据源读取原始摘要，并标注数据出处。";$("#detailLink").textContent="原文链接待真实数据源接入";go("about")}
+function openEditor(id){editId=id||null;const p=papers.find(item=>item.id===id);$("#modalTitle").textContent=p?"编辑论文":"新增论文";$("#editTitle").value=p?.title||"";$("#editConf").value=p?.conf||"CVPR";$("#editYear").value=p?.year||"2025";$("#editKeywords").value=p?.keywords||"";$("#editModal").classList.add("open");$("#editTitle").focus()}
+function closeEditor(){$("#editModal").classList.remove("open")}$("#addPaper").onclick=()=>openEditor();$("#cancelEdit").onclick=closeEditor;$("#editModal").onclick=e=>{if(e.target.id==="editModal")closeEditor()};
+$("#saveEdit").onclick=()=>{const title=$("#editTitle").value.trim();if(!title){toast("请先填写论文题目");$("#editTitle").focus();return}const payload={title,conf:$("#editConf").value,year:$("#editYear").value,keywords:$("#editKeywords").value.trim()||"待补充"};if(editId){Object.assign(papers.find(p=>p.id===editId),payload)}else{papers.unshift({id:"P"+String(Date.now()).slice(-5),...payload})}closeEditor();renderPapers();updateCount();toast(editId?"论文已更新":"论文已新增")};
+function submitTitles(raw,conf,year){const titles=raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);if(!titles.length){toast("请先输入至少一个论文题目");return}titles.forEach((title,i)=>papers.unshift({id:"P"+String(Date.now()+i).slice(-5),title,conf,year,keywords:"待补充"}));updateCount();$("#importResult").hidden=false;$("#importResult").textContent="已导入 "+titles.length+" 条演示记录。摘要、关键词和原文链接需要真实数据接口补全。";toast("导入完成："+titles.length+" 条演示记录")}
+$("#singleSubmit").onclick=()=>submitTitles($("#singleTitle").value,$("#singleConf").value,$("#singleYear").value);$("#batchSubmit").onclick=()=>submitTitles($("#batchTitles").value,"CVPR","2025");
+topics.forEach(([name])=>$("#trendKeyword").add(new Option(name,name)));
+let trendTimer;
+function renderTrend(maxPoints=4){const name=$("#trendKeyword").value||topics[0][0],conf=$("#trendConference").value;const seed=topics.findIndex(t=>t[0]===name)+1;const offset=conf==="CVPR"?8:conf==="ICCV"?-5:conf==="ECCV"?-10:0;const values=[32+seed,44+seed*2,57+seed*3,75+seed*2].map(v=>Math.max(15,Math.min(96,v+offset)));const xs=[35,278,521,765];const points=values.slice(0,maxPoints).map((v,i)=>[xs[i],260-v*2.1]);const path=points.map(([x,y],i)=>(i?"L":"M")+x+" "+y).join(" ");const area=path+" L"+points.at(-1)[0]+" 290 L35 290 Z";$("#trendSvg").innerHTML='<path class="area" d="'+area+'"/><path class="line" d="'+path+'"/>'+points.map(([x,y])=>'<circle cx="'+x+'" cy="'+y+'" r="6" fill="#64e7e0"/>').join("")}
+$("#trendKeyword").onchange=()=>renderTrend();$("#trendConference").onchange=()=>renderTrend();$("#playTrend").onclick=()=>{clearInterval(trendTimer);let point=1;renderTrend(point);trendTimer=setInterval(()=>{point++;renderTrend(point);if(point===4)clearInterval(trendTimer)},450)};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeEditor()});
+renderTopics();renderPapers();renderTrend();updateCount();
+</script>
+<script>
+/* VisionPulse live analytics bridge: connects the prototype to the local TF-IDF + K-means API. */
+(function () {
+  const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:8000" : "";
+  let liveAnalytics = null;
+  let liveTrendData = null;
+  const demoRenderTrend = renderTrend;
+
+  function textOf(value) {
+    return Array.isArray(value) ? value.join(", ") : String(value || "");
+  }
+
+  function normalizePaper(row) {
+    return {
+      id: String(row.id ?? row.dblp_key ?? ""),
+      title: row.title || "未命名论文",
+      conf: row.venue || row.conf || "未知会议",
+      year: String(row.year || ""),
+      keywords: textOf(row.keywords || "待补充")
+    };
+  }
+
+  async function getJSON(path) {
+    const response = await fetch(API_BASE + path, { headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    return response.json();
+  }
+
+  function setLiveStatus(message, isError) {
+    let el = $("#liveStatus");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "liveStatus";
+      el.className = "notice";
+      $(".stats").after(el);
+    }
+    el.textContent = message;
+    el.style.borderColor = isError ? "#7b465e" : "#35535d";
+    el.style.color = isError ? "#ffc6d8" : "#b5f8ef";
+  }
+
+  function renderLiveTopics(summary) {
+    const topicsData = (summary.topics || []).slice(0, 10);
+    const max = Math.max(1, ...topicsData.map(item => Number(item.paper_count) || 0));
+    $("#topBars").innerHTML = topicsData.length
+      ? topicsData.map(item => {
+          const count = Number(item.paper_count) || 0;
+          const width = Math.max(8, Math.round(count / max * 100));
+          return '<div class="bar"><span>' + escapeHtml(item.label) +
+            '</span><div class="bar-track"><div class="bar-fill" style="width:' + width +
+            '%"></div></div><b>' + count + '</b></div>';
+        }).join("")
+      : '<div class="empty">暂无聚类结果，请先导入论文。</div>';
+  }
+
+  function renderLiveKeywords(summary) {
+    const keywords = (summary.keywords || []).slice(0, 30);
+    $("#cloud").innerHTML = keywords.length
+      ? keywords.map((item, index) => {
+          const size = Math.max(13, Math.min(22, 13 + (30 - index) / 4));
+          return '<button class="chip" style="font-size:' + size + 'px" data-live-keyword="' +
+            escapeHtml(item.keyword) + '">' + escapeHtml(item.keyword) + '</button>';
+        }).join("")
+      : '<div class="empty">暂无关键词，请先导入论文。</div>';
+    $$("[data-live-keyword]").forEach(button => {
+      button.onclick = () => selectLiveKeyword(button.dataset.liveKeyword, button);
+    });
+  }
+
+  async function selectLiveKeyword(keyword, button) {
+    $$("[data-live-keyword]").forEach(item => item.classList.toggle("active", item === button));
+    $("#keywordHint").textContent = "正在加载 “" + keyword + "” 的关联论文…";
+    try {
+      const result = await getJSON("/api/analytics/keywords?keyword=" + encodeURIComponent(keyword) + "&limit=100");
+      papers = (result.papers || []).map(normalizePaper);
+      $("#paperSearch").value = "";
+      renderPapers();
+      $("#keywordHint").textContent = keyword + " · 找到 " + papers.length + " 篇关联论文。";
+      let viewButton = $("#keywordView");
+      if (!viewButton) {
+        viewButton = document.createElement("button");
+        viewButton.id = "keywordView";
+        viewButton.className = "btn";
+        $("#keywordHint").after(viewButton);
+      }
+      viewButton.textContent = "查看关联论文";
+      viewButton.onclick = () => go("papers");
+      go("papers");
+      toast("已载入关键词 “" + keyword + "” 的关联论文");
+    } catch (error) {
+      $("#keywordHint").textContent = "关键词数据暂时不可用，请确认本地 API 已启动。";
+      toast("无法读取关键词数据");
+    }
+  }
+
+  function setupTrendKeywords(summary) {
+    const select = $("#trendKeyword");
+    const values = (summary.keywords || []).slice(0, 30).map(item => item.keyword);
+    const fromTrend = (liveTrendData && liveTrendData.records || []).map(item => item.keyword);
+    const options = Array.from(new Set(values.concat(fromTrend))).slice(0, 40);
+    select.innerHTML = options.length
+      ? options.map(keyword => '<option value="' + escapeHtml(keyword) + '">' + escapeHtml(keyword) + '</option>').join("")
+      : '<option value="">暂无趋势关键词</option>';
+  }
+
+  function renderLiveTrend(maxPoints) {
+    if (!liveTrendData) {
+      demoRenderTrend(maxPoints);
+      return;
+    }
+    const keyword = $("#trendKeyword").value;
+    const conference = $("#trendConference").value;
+    const allYears = (liveTrendData.years || []).map(Number).sort((a, b) => a - b);
+    const years = allYears.length ? allYears : [2022, 2023, 2024, 2025];
+    const records = (liveTrendData.records || []).filter(item =>
+      (!keyword || item.keyword === keyword) &&
+      (conference === "全部会议" || item.venue === conference)
+    );
+    const values = years.map(year => records
+      .filter(item => Number(item.year) === year)
+      .reduce((sum, item) => sum + Number(item.paper_count || 0), 0));
+    const maxValue = Math.max(1, ...values);
+    const positions = years.map((year, index) => {
+      const ratio = years.length === 1 ? 1 : index / (years.length - 1);
+      return [35 + ratio * 730, 260 - (values[index] / maxValue) * 205];
+    });
+    const visible = positions.slice(0, Math.max(1, maxPoints || positions.length));
+    const path = visible.map(([x, y], index) => (index ? "L" : "M") + x + " " + y).join(" ");
+    const last = visible[visible.length - 1] || [35, 260];
+    const area = path + " L" + last[0] + " 290 L35 290 Z";
+    $("#trendSvg").innerHTML = visible.length && records.length
+      ? '<path class="area" d="' + area + '"/><path class="line" d="' + path + '"/>' +
+        visible.map(([x, y]) => '<circle cx="' + x + '" cy="' + y + '" r="6" fill="#64e7e0"/>').join("")
+      : '<text x="400" y="155" text-anchor="middle" fill="#aeb7cf">该关键词在当前会议范围内暂无趋势数据</text>';
+    const labels = $(".year-labels");
+    labels.innerHTML = years.map(year => "<span>" + year + "</span>").join("");
+    const legend = $(".legend");
+    legend.innerHTML = '<span><i></i>论文数量</span><span>' +
+      (records.length ? "基于已分析论文按年份统计" : "等待更多 CVPR、ICCV、ECCV 数据") + "</span>";
+  }
+
+  async function hydrateAnalytics() {
+    try {
+      liveAnalytics = await getJSON("/api/analytics/summary");
+      liveTrendData = await getJSON("/api/analytics/trends");
+      $("#paperCount").textContent = liveAnalytics.paper_count;
+      $("#paperCount").nextElementSibling.textContent = "已分析论文";
+      renderLiveTopics(liveAnalytics);
+      renderLiveKeywords(liveAnalytics);
+      setupTrendKeywords(liveAnalytics);
+      renderLiveTrend(4);
+      setLiveStatus("实时分析已连接 · TF-IDF 向量化 + K-Means 聚类 · 更新时间 " +
+        new Date(liveAnalytics.run_at).toLocaleString("zh-CN"), false);
+    } catch (error) {
+      setLiveStatus("当前显示演示数据。启动本地 API 后刷新页面即可载入真实聚类结果。", true);
+    }
+  }
+
+  renderTrend = renderLiveTrend;
+  $("#trendKeyword").onchange = () => renderLiveTrend(4);
+  $("#trendConference").onchange = () => renderLiveTrend(4);
+  hydrateAnalytics();
+})();
+</script>
+<script>
+/* VisionPulse live api actions: real search and import flows for the course implementation. */
+(function () {
+  const API_ROOT = location.protocol === "file:" ? "http://127.0.0.1:8000" : "";
+
+  function paperFromApi(row) {
+    return {
+      id: String(row.id ?? row.dblp_key ?? ""),
+      title: row.title || "未命名论文",
+      conf: row.venue || row.conf || "未知会议",
+      year: String(row.year || ""),
+      keywords: Array.isArray(row.keywords) ? row.keywords.join(", ") : String(row.keywords || "待补充")
+    };
+  }
+
+  async function request(path, options) {
+    const response = await fetch(API_ROOT + path, options);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || ("HTTP " + response.status));
+    return data;
+  }
+
+  async function searchRemote() {
+    const query = $("#paperSearch").value.trim();
+    const exact = $("#searchMode").value === "exact";
+    $("#searchPapers").disabled = true;
+    $("#searchPapers").textContent = "查询中…";
+    try {
+      const result = await request("/api/papers?q=" + encodeURIComponent(query) +
+        "&exact=" + (exact ? "1" : "0") + "&online=1");
+      papers = (result.papers || []).map(paperFromApi);
+      renderPapers();
+      toast(result.source === "dblp" ? "已从 DBLP 检索并写入本地缓存" : "已读取本地论文库");
+    } catch (error) {
+      toast("查询失败：" + error.message);
+    } finally {
+      $("#searchPapers").disabled = false;
+      $("#searchPapers").textContent = "查询";
+    }
+  }
+
+  async function importRemote(raw, venue, year) {
+    const titles = raw.split(/\r?\n/).map(item => item.trim()).filter(Boolean);
+    if (!titles.length) {
+      toast("请先输入至少一个论文题目");
+      return;
+    }
+    try {
+      const result = await request("/api/papers/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ titles, venue, year: Number(year) })
+      });
+      $("#importResult").hidden = false;
+      $("#importResult").textContent = "已写入 SQLite：" + result.imported +
+        " 条。向量化和聚类已自动刷新，页面即将同步。";
+      toast("真实导入完成：" + result.imported + " 条");
+      window.setTimeout(() => location.reload(), 700);
+    } catch (error) {
+      $("#importResult").hidden = false;
+      $("#importResult").textContent = "导入失败：" + error.message;
+      toast("导入失败，请确认本地 API 正在运行");
+    }
+  }
+
+  $("#searchPapers").onclick = searchRemote;
+  $("#paperSearch").onkeydown = event => {
+    if (event.key === "Enter") searchRemote();
+  };
+  $("#mockFetch").onclick = searchRemote;
+  $("#singleSubmit").onclick = () => importRemote(
+    $("#singleTitle").value, $("#singleConf").value, $("#singleYear").value
+  );
+  $("#batchSubmit").onclick = () => importRemote(
+    $("#batchTitles").value, "CVPR", "2025"
+  );
+})();
+</script>
+</body>
+</html>

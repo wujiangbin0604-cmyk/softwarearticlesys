@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""Minimal local-first HTTP API for the VisionPulse prototype."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import parse_qs, urlparse
+
+from src.hybrid_service import HybridPaperService
+from src.storage import PaperStore
+
+
+ROOT = Path(__file__).resolve().parent
+
+
+class ApiHandler(BaseHTTPRequestHandler):
+    service: HybridPaperService
+
+    def _send_json(self, payload: dict, status: int = 200) -> None:
+        body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        # prototype.html is opened from file://, which sends the browser origin as null.
+        # Keep the local demo usable without exposing the API to arbitrary websites.
+        self.send_header("Access-Control-Allow-Origin", "null")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Accept")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_OPTIONS(self) -> None:  # noqa: N802 - browser preflight for JSON POST
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "null")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Accept")
+        self.end_headers()
+    def do_GET(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API name
+        parsed = urlparse(self.path)
+        if parsed.path == "/api/health":
+            self._send_json({"ok": True, "cache_count": self.service.store.count()})
+            return
+        if parsed.path == "/api/papers":
+            params = parse_qs(parsed.query)
+            query = params.get("q", [""])[0]
+            exact = params.get("exact", ["0"])[0] == "1"
+            online = params.get("online", ["1"])[0] == "1"
+            try:
+                self._send_json(self.service.search(query, exact=exact, fetch_online=online))
+            except RuntimeError as exc:
+                self._send_json({"error": str(exc)}, status=502)
+            return
+        if parsed.path == "/api/analytics/summary":
+            self._send_json(self.service.store.analysis_summary())
+            return
+        if parsed.path == "/api/analytics/keywords":
+            params = parse_qs(parsed.query)
+            keyword = params.get("keyword", [""])[0].strip().casefold()
+            limit = int(params.get("limit", ["50"])[0])
+            self._send_json({"keyword": keyword, "papers": self.service.store.keyword_papers(keyword, limit)})
+            return
+        if parsed.path == "/api/analytics/trends":
+            params = parse_qs(parsed.query)
+            raw_keywords = params.get("keywords", [""])[0]
+            keywords = [item.strip() for item in raw_keywords.split(",") if item.strip()]
+            self._send_json(self.service.store.analysis_trends(keywords or None))
+            return
+        self._send_json({"error": "Not found"}, status=404)
+
+    def do_POST(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API name
+        if urlparse(self.path).path != "/api/papers/import":
+            self._send_json({"error": "Not found"}, status=404)
+            return
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+            body = json.loads(self.rfile.read(length).decode("utf-8"))
+            titles = body.get("titles", [])
+            if not isinstance(titles, list):
+                raise ValueError("titles must be a JSON array")
+            count = self.service.import_titles(
+                [str(title) for title in titles],
+                venue=str(body.get("venue", "CVPR")),
+                year=int(body.get("year", 2025)),
+            )
+            self._send_json({"imported": count, "source": "user-import"}, status=201)
+        except (ValueError, TypeError, json.JSONDecodeError) as exc:
+            self._send_json({"error": str(exc)}, status=400)
+
+    def log_message(self, format: str, *args) -> None:
+        print(format % args)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Run the VisionPulse local-first API")
+    parser.add_argument("--host", default="127.0.0.1")
+    parser.add_argument("--port", type=int, default=8000)
+    parser.add_argument("--db", type=Path, default=Path("data/visionpulse.sqlite3"))
+    parser.add_argument("--no-online", action="store_true", help="disable DBLP fallback")
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    store = PaperStore(args.db)
+    ApiHandler.service = HybridPaperService(store, online_enabled=not args.no_online)
+    server = ThreadingHTTPServer((args.host, args.port), ApiHandler)
+    print(f"VisionPulse API listening at http://{args.host}:{args.port}")
+    print(f"SQLite cache: {Path(args.db).resolve()}")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping server")
+    finally:
+        server.server_close()
+
+
+if __name__ == "__main__":
+    main()
