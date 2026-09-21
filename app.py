@@ -32,6 +32,16 @@ class ApiHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_file(self, path: Path, content_type: str) -> None:
+        if not path.is_file():
+            self._send_json({"error": "Not found"}, status=404)
+            return
+        body = path.read_bytes()
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
     def do_OPTIONS(self) -> None:  # noqa: N802 - browser preflight for JSON POST
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "null")
@@ -40,6 +50,13 @@ class ApiHandler(BaseHTTPRequestHandler):
         self.end_headers()
     def do_GET(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API name
         parsed = urlparse(self.path)
+        if parsed.path in ("/", "/prototype.html"):
+            self._send_file(ROOT / "prototype.html", "text/html; charset=utf-8")
+            return
+        if parsed.path == "/intro-research-bg.png":
+            self._send_file(ROOT / "intro-research-bg.png", "image/png")
+            return
+
         if parsed.path == "/api/health":
             self._send_json({"ok": True, "cache_count": self.service.store.count()})
             return
