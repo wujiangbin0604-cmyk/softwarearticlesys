@@ -108,6 +108,47 @@ class ApiHandler(BaseHTTPRequestHandler):
         self._send_json({"error": "Not found"}, status=404)
 
     def do_POST(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API name
+        if urlparse(self.path).path == "/api/papers/update":
+            expected_token = os.getenv("IMPORT_TOKEN")
+            if not is_valid_import_token(expected_token, self.headers.get("X-Import-Token")):
+                self._send_json({"error": "update requires a valid IMPORT_TOKEN"}, status=401)
+                return
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+                paper_id = int(body.get("id"))
+                raw_keywords = body.get("keywords", [])
+                keywords = raw_keywords if isinstance(raw_keywords, list) else [item.strip() for item in str(raw_keywords).split(",") if item.strip()]
+                updated = self.service.store.update_paper(
+                    paper_id,
+                    title=str(body.get("title", "")),
+                    venue=str(body.get("venue") or "") or None,
+                    year=int(body["year"]) if body.get("year") not in (None, "") else None,
+                    keywords=[str(item) for item in keywords if str(item).strip()],
+                )
+                if updated is None:
+                    self._send_json({"error": "paper not found"}, status=404)
+                else:
+                    self._send_json({"paper": updated})
+            except (ValueError, TypeError, json.JSONDecodeError) as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            return
+        if urlparse(self.path).path == "/api/papers/delete":
+            expected_token = os.getenv("IMPORT_TOKEN")
+            if not is_valid_import_token(expected_token, self.headers.get("X-Import-Token")):
+                self._send_json({"error": "delete requires a valid IMPORT_TOKEN"}, status=401)
+                return
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+                paper_id = int(body.get("id"))
+                if not self.service.store.delete_paper(paper_id):
+                    self._send_json({"error": "paper not found"}, status=404)
+                else:
+                    self._send_json({"deleted": True, "id": paper_id})
+            except (ValueError, TypeError, json.JSONDecodeError) as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            return
         if urlparse(self.path).path == "/api/papers/purge-source-query":
             expected_token = os.getenv("IMPORT_TOKEN")
             provided_token = self.headers.get("X-Import-Token")

@@ -166,6 +166,36 @@ class PaperStore:
             )
             return [self._row_to_dict(row) for row in rows]
 
+    def update_paper(self, paper_id: int, *, title: str, venue: str | None,
+                     year: int | None, keywords: list[str]) -> dict | None:
+        title = title.strip()
+        if not title:
+            raise ValueError("title is required")
+        with self.connection() as connection:
+            connection.execute(
+                """
+                UPDATE papers
+                SET title = ?, title_normalized = ?, venue = ?, year = ?, keywords_json = ?, fetched_at = ?
+                WHERE id = ?
+                """,
+                (title, normalize_title(title), venue, year,
+                 json.dumps(keywords, ensure_ascii=False), datetime.now(timezone.utc).isoformat(), paper_id),
+            )
+            row = connection.execute("SELECT * FROM papers WHERE id = ?", (paper_id,)).fetchone()
+            connection.commit()
+        if row is None:
+            return None
+        self.refresh_analysis()
+        return self._row_to_dict(row)
+
+    def delete_paper(self, paper_id: int) -> bool:
+        with self.connection() as connection:
+            cursor = connection.execute("DELETE FROM papers WHERE id = ?", (paper_id,))
+            deleted = cursor.rowcount
+            connection.commit()
+        if deleted:
+            self.refresh_analysis()
+        return bool(deleted)
     def delete_by_source_query(self, source_query: str) -> int:
         """Delete records created by one controlled import/search operation."""
         with self.connection() as connection:

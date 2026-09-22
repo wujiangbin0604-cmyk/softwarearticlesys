@@ -21,6 +21,20 @@ class AnalysisEngineTests(unittest.TestCase):
         self.assertEqual(summary["topics"], [])
         self.assertEqual(summary["keywords"], [])
         self.assertEqual(self.store.analysis_trends(), {"years": [], "venues": [], "records": []})
+    def test_update_and_delete_persist_and_refresh_analysis(self):
+        paper = Paper(
+            title="Editable Vision Paper", authors=[], venue="CVPR", year=2025,
+            doi=None, dblp_url=None, electronic_edition=[], dblp_key="editable",
+            paper_type="user-import", keywords=["old-keyword"],
+        )
+        self.store.upsert_many([paper])
+        row = self.store.all(limit=1)[0]
+        updated = self.store.update_paper(row["id"], title="Updated Vision Paper", venue="ECCV", year=2024, keywords=["new-keyword"])
+        self.assertEqual(updated["title"], "Updated Vision Paper")
+        self.assertEqual(self.store.all(limit=1)[0]["venue"], "ECCV")
+        self.assertTrue(self.store.delete_paper(row["id"]))
+        self.assertEqual(self.store.count(), 0)
+        self.assertFalse(self.store.delete_paper(row["id"]))
     def test_refresh_builds_topics_keywords_and_conference_trends(self):
         papers = [
             Paper(
