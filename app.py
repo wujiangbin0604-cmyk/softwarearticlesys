@@ -99,6 +99,23 @@ class ApiHandler(BaseHTTPRequestHandler):
         self._send_json({"error": "Not found"}, status=404)
 
     def do_POST(self) -> None:  # noqa: N802 - BaseHTTPRequestHandler API name
+        if urlparse(self.path).path == "/api/papers/purge-source-query":
+            expected_token = os.getenv("IMPORT_TOKEN")
+            provided_token = self.headers.get("X-Import-Token")
+            if not is_valid_import_token(expected_token, provided_token):
+                self._send_json({"error": "purge requires a valid IMPORT_TOKEN"}, status=401)
+                return
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+                body = json.loads(self.rfile.read(length).decode("utf-8"))
+                source_query = str(body.get("source_query", "")).strip()
+                if not source_query:
+                    raise ValueError("source_query is required")
+                count = self.service.store.delete_by_source_query(source_query)
+                self._send_json({"deleted": count, "source_query": source_query})
+            except (ValueError, TypeError, json.JSONDecodeError) as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            return
         if urlparse(self.path).path == "/api/papers/import-records":
             expected_token = os.getenv("IMPORT_TOKEN")
             provided_token = self.headers.get("X-Import-Token")
@@ -167,4 +184,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
+
+
 

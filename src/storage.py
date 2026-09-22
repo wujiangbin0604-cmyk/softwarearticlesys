@@ -166,6 +166,15 @@ class PaperStore:
             )
             return [self._row_to_dict(row) for row in rows]
 
+    def delete_by_source_query(self, source_query: str) -> int:
+        """Delete records created by one controlled import/search operation."""
+        with self.connection() as connection:
+            cursor = connection.execute("DELETE FROM papers WHERE source_query = ?", (source_query,))
+            deleted = cursor.rowcount
+            connection.commit()
+        if deleted:
+            self.refresh_analysis()
+        return int(deleted)
     def count(self) -> int:
         with self.connection() as connection:
             return int(connection.execute("SELECT COUNT(*) FROM papers").fetchone()[0])
@@ -177,3 +186,4 @@ class PaperStore:
         data["electronic_edition"] = json.loads(data.pop("electronic_edition_json"))
         data["keywords"] = json.loads(data.pop("keywords_json"))
         return data
+
