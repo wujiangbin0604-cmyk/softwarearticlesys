@@ -122,7 +122,9 @@ renderTopics();renderPapers();renderTrend();updateCount();
 <script>
 /* VisionPulse live analytics bridge: connects the prototype to the local TF-IDF + K-means API. */
 (function () {
-  const API_BASE = location.protocol === "file:" ? "http://127.0.0.1:8000" : "";
+  // file:// 预览默认连接线上 API；本地开发可通过 ?api=http://127.0.0.1:8000 覆盖。
+  const apiOverride = new URLSearchParams(location.search).get("api");
+  const API_BASE = apiOverride || (location.protocol === "file:" ? "https://softwarearticlesys.onrender.com" : "");
   let liveAnalytics = null;
   let liveTrendData = null;
   const demoRenderTrend = renderTrend;
@@ -298,7 +300,8 @@ renderTopics();renderPapers();renderTrend();updateCount();
 <script>
 /* VisionPulse live api actions: real search and import flows for the course implementation. */
 (function () {
-  const API_ROOT = location.protocol === "file:" ? "http://127.0.0.1:8000" : "";
+  const apiOverride = new URLSearchParams(location.search).get("api");
+  const API_ROOT = apiOverride || (location.protocol === "file:" ? "https://softwarearticlesys.onrender.com" : "");
 
   function paperFromApi(row) {
     return {
