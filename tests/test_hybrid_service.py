@@ -26,6 +26,11 @@ class HybridServiceTests(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
+    def test_abstract_match_ignores_arxiv_prefix_and_rejects_wrong_title(self):
+        exact = Paper(title="Large VLM-based Vision-Language-Action Models for Robotic Manipulation A Survey", authors=[], venue="", year=2025, doi=None, dblp_url=None, electronic_edition=[], dblp_key="exact", paper_type="OpenAlex", abstract="full abstract")
+        wrong = Paper(title="Unrelated Vision Models", authors=[], venue="", year=2025, doi=None, dblp_url=None, electronic_edition=[], dblp_key="wrong", paper_type="OpenAlex", abstract="wrong abstract")
+        self.assertEqual(HybridPaperService._best_abstract_match("2508.13073 Large VLM-based Vision-Language-Action Models for Robotic Manipulation A Survey", [wrong, exact]), exact)
+        self.assertIsNone(HybridPaperService._best_abstract_match("A completely different paper", [wrong]))
     def test_local_search_is_used_before_remote(self):
         self.store.upsert_many([self.paper])
         service = HybridPaperService(self.store, online_enabled=False)

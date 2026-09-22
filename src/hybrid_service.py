@@ -88,11 +88,28 @@ class HybridPaperService:
         if row.get("abstract"):
             return {"paper": row, "source": "cache"}
         source, papers, errors = search_with_fallback(row["title"], limit=3, user_agent=self.user_agent)
-        match = next((paper for paper in papers if paper.abstract), None)
+        match = self._best_abstract_match(row["title"], papers)
         if match is None:
             return {"paper": row, "source": source, "errors": errors}
         updated = self.store.update_abstract(paper_id, match.abstract or "", match.keywords or None)
         return {"paper": updated or row, "source": source, "errors": errors}
+    @staticmethod
+    def _best_abstract_match(title: str, papers):
+        def clean(value: str) -> str:
+            value = re.sub(r"^\d{4}\.\d{4,5}\s+", "", value or "")
+            return re.sub(r"[^a-z0-9]+", " ", value.casefold()).strip()
+
+        target = clean(title)
+        candidates = [paper for paper in papers if paper.abstract]
+        if not candidates:
+            return None
+        ranked = sorted(
+            candidates,
+            key=lambda paper: SequenceMatcher(None, target, clean(paper.title)).ratio(),
+            reverse=True,
+        )
+        score = SequenceMatcher(None, target, clean(ranked[0].title)).ratio()
+        return ranked[0] if score >= 0.65 else None
     def import_titles(self, titles: list[str], venue: str = "CVPR", year: int = 2025) -> int:
         """Import titles as searchable placeholders until metadata enrichment runs."""
         from scripts.dblp_fetch import Paper
