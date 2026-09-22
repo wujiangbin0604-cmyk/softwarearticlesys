@@ -81,6 +81,18 @@ class HybridPaperService:
             result["fallback_errors"] = errors
         return result
 
+    def enrich_abstract(self, paper_id: int) -> dict:
+        row = self.store.get_paper(paper_id)
+        if row is None:
+            raise ValueError("paper not found")
+        if row.get("abstract"):
+            return {"paper": row, "source": "cache"}
+        source, papers, errors = search_with_fallback(row["title"], limit=3, user_agent=self.user_agent)
+        match = next((paper for paper in papers if paper.abstract), None)
+        if match is None:
+            return {"paper": row, "source": source, "errors": errors}
+        updated = self.store.update_abstract(paper_id, match.abstract or "", match.keywords or None)
+        return {"paper": updated or row, "source": source, "errors": errors}
     def import_titles(self, titles: list[str], venue: str = "CVPR", year: int = 2025) -> int:
         """Import titles as searchable placeholders until metadata enrichment runs."""
         from scripts.dblp_fetch import Paper

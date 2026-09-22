@@ -166,6 +166,23 @@ class PaperStore:
             )
             return [self._row_to_dict(row) for row in rows]
 
+    def get_paper(self, paper_id: int) -> dict | None:
+        with self.connection() as connection:
+            row = connection.execute("SELECT * FROM papers WHERE id = ?", (paper_id,)).fetchone()
+        return self._row_to_dict(row) if row else None
+
+    def update_abstract(self, paper_id: int, abstract: str, keywords: list[str] | None = None) -> dict | None:
+        with self.connection() as connection:
+            if keywords is None:
+                connection.execute("UPDATE papers SET abstract = ? WHERE id = ?", (abstract, paper_id))
+            else:
+                connection.execute(
+                    "UPDATE papers SET abstract = ?, keywords_json = ? WHERE id = ?",
+                    (abstract, json.dumps(keywords, ensure_ascii=False), paper_id),
+                )
+            row = connection.execute("SELECT * FROM papers WHERE id = ?", (paper_id,)).fetchone()
+            connection.commit()
+        return self._row_to_dict(row) if row else None
     def update_paper(self, paper_id: int, *, title: str, venue: str | None,
                      year: int | None, keywords: list[str]) -> dict | None:
         title = title.strip()

@@ -71,6 +71,15 @@ class ApiHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/health":
             self._send_json({"ok": True, "cache_count": self.service.store.count()})
             return
+        if parsed.path.startswith("/api/papers/") and parsed.path.endswith("/abstract"):
+            try:
+                paper_id = int(parsed.path.split("/")[3])
+                self._send_json(self.service.enrich_abstract(paper_id))
+            except (ValueError, TypeError) as exc:
+                self._send_json({"error": str(exc)}, status=400)
+            except RuntimeError as exc:
+                self._send_json({"error": str(exc)}, status=502)
+            return
         if parsed.path == "/api/papers":
             params = parse_qs(parsed.query)
             query = params.get("q", [""])[0]
