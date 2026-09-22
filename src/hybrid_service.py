@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import re
 import time
 from dataclasses import asdict
+from difflib import SequenceMatcher
 
 from scripts.alternative_fetch import search_with_fallback
 from scripts.dblp_fetch import DEFAULT_USER_AGENT, iter_query_hits
