@@ -370,9 +370,10 @@ renderTopics();renderPapers();renderTrend();updateCount();
     }
   }
 
-  $("#searchPapers").onclick = searchRemote;
+  // Local search is instant; only the fallback button performs an online request.
+  $("#searchPapers").onclick = () => { renderPapers(); toast("已使用本地论文库"); };
   $("#paperSearch").onkeydown = event => {
-    if (event.key === "Enter") searchRemote();
+    if (event.key === "Enter") { renderPapers(); toast("已使用本地论文库"); }
   };
   $("#mockFetch").onclick = searchRemote;
   $("#singleSubmit").onclick = () => importRemote(
