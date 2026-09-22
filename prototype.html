@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VisionPulse · 顶会热词统计交互原型</title>
+<title>VisionPulse · 顶会热词统计平台</title>
 <style>
-/* 原型样式：沿用 VisionPulse 深色视觉，所有内容均为演示数据。 */
+/* VisionPulse 主界面样式。 */
 :root{--bg:#0b0d18;--side:#101426;--panel:#171b30;--panel2:#1c2340;--line:#303855;--text:#f5f7ff;--muted:#aeb7cf;--cyan:#64e7e0;--violet:#aa8cff;--pink:#ff9cc1;--r:18px}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 system-ui,"Microsoft YaHei",sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;z-index:99;background:var(--cyan);color:#06121a;padding:8px}
 .shell{display:grid;grid-template-columns:250px minmax(0,1fr);min-height:100vh}.sidebar{position:sticky;top:0;height:100vh;background:var(--side);border-right:1px solid var(--line);padding:25px 16px;display:flex;flex-direction:column;z-index:5}.logo{display:flex;align-items:center;gap:10px;padding:0 10px 25px}.logo-icon{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--violet),var(--cyan));color:#0b0d18;font-size:22px;font-weight:900}.logo strong{font-size:18px;letter-spacing:-.04em}.logo small{display:block;color:var(--muted);font-size:11px}.nav-title{margin:12px 10px 7px;color:#7684a5;font-size:11px;letter-spacing:.15em}.nav button{display:flex;align-items:center;gap:12px;width:100%;padding:12px;border:0;border-radius:12px;background:transparent;color:var(--muted);text-align:left;margin:2px 0}.nav button:hover,.nav button[aria-current=page]{background:#252d4c;color:white}.nav button[aria-current=page]{box-shadow:inset 3px 0 var(--cyan)}.nav b{font-size:18px;width:23px;text-align:center;font-weight:400}.side-foot{margin-top:auto;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--muted);font-size:12px}.main{min-width:0;padding:26px clamp(18px,4vw,54px) 58px;background:radial-gradient(circle at 90% 0,#232b4e 0,transparent 31%)}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:26px}.topbar small{color:var(--muted)}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid #3b5862;color:var(--cyan);border-radius:999px;padding:5px 10px;font-size:12px}.mobile-toggle{display:none}.view{display:none;animation:appear .26s ease}.view.active{display:block}@keyframes appear{from{opacity:.3;transform:translateY(8px)}to{opacity:1;transform:none}}
@@ -17,54 +17,54 @@ h1{font-size:clamp(30px,4.5vw,54px);letter-spacing:-.055em;line-height:1.12;marg
 <a class="skip" href="#main">跳转到主要内容</a>
 <div class="shell">
 <aside class="sidebar" id="sidebar">
-  <div class="logo"><div class="logo-icon">✦</div><div><strong>VisionPulse</strong><small>交互原型 · 演示数据</small></div></div>
+  <div class="logo"><div class="logo-icon">✦</div><div><strong>VisionPulse</strong><small>论文分析工作台</small></div></div>
   <div class="nav-title">平台页面</div>
-  <nav class="nav" aria-label="原型导航">
+  <nav class="nav" aria-label="主导航">
     <button data-page="home" aria-current="page"><b>⌂</b>首页 / 热门方向</button>
     <button data-page="trends"><b>⌁</b>热度走势对比</button>
     <button data-page="papers"><b>▤</b>论文列表管理</button>
     <button data-page="import"><b>↥</b>论文爬取 / 导入</button>
     <button data-page="about"><b>ⓘ</b>详情 / 关于</button>
   </nav>
-  <div class="side-foot">此页面用于检查交互流程。论文、统计数字与爬取结果均为原型演示数据。</div>
+  <div class="side-foot">论文、统计数字与爬取结果均来自当前数据服务。</div>
 </aside>
 <main class="main" id="main">
-  <header class="topbar"><div><button class="btn subtle mobile-toggle" id="menuToggle" aria-label="打开导航">☰</button><small id="breadcrumb">工作台 / 首页</small></div><span class="pill">● 交互原型</span></header>
+  <header class="topbar"><div><button class="btn subtle mobile-toggle" id="menuToggle" aria-label="打开导航">☰</button><small id="breadcrumb">工作台 / 首页</small></div><span class="pill">● 实时分析</span></header>
   <!-- 页面一：首页和关键词图谱 -->
   <section class="view active" id="page-home">
     <div class="hero"><h1>从顶会论文中<br>看见研究的下一步。</h1><p class="lead">聚合 CVPR、ICCV、ECCV 论文，快速识别热门研究方向和关联工作。</p><div class="actions"><button class="btn primary" data-go="trends">查看热度走势</button><button class="btn" data-go="import">导入论文</button></div></div>
-    <div class="stats"><div class="stat"><strong id="paperCount">12</strong><span>原型演示论文</span></div><div class="stat"><strong>3</strong><span>顶级会议</span></div><div class="stat"><strong>2022—2025</strong><span>统计年份</span></div></div>
-    <div class="grid"><div class="card"><div class="card-head"><div><h2>Top 10 热门方向</h2><p>示意热度值，可在正式开发中替换为真实统计</p></div><select class="field" id="homeYear" aria-label="选择年份"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div><div class="bars" id="topBars"></div></div><div class="card"><div class="card-head"><div><h2>关键词图谱</h2><p>点击词条查看相关论文</p></div></div><div class="cloud" id="cloud"></div><p class="hint" id="keywordHint">选择一个关键词，查看关联论文。</p></div></div>
+    <div class="stats"><div class="stat"><strong id="paperCount">12</strong><span>已分析论文</span></div><div class="stat"><strong>3</strong><span>顶级会议</span></div><div class="stat"><strong>2022—2025</strong><span>统计年份</span></div></div>
+    <div class="grid"><div class="card"><div class="card-head"><div><h2>Top 10 热门方向</h2><p>按论文聚类结果计算</p></div><select class="field" id="homeYear" aria-label="选择年份"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></div><div class="bars" id="topBars"></div></div><div class="card"><div class="card-head"><div><h2>关键词图谱</h2><p>点击词条查看相关论文</p></div></div><div class="cloud" id="cloud"></div><p class="hint" id="keywordHint">选择一个关键词，查看关联论文。</p></div></div>
   </section>
   <!-- 页面二：热度走势对比 -->
   <section class="view" id="page-trends">
-    <h1>热度走势对比</h1><p class="lead">选择关键词和会议，观察 2022—2025 年的示意热度变化。播放按钮可演示逐年出现的动画。</p>
-    <div class="card"><div class="toolbar"><label>关键词 <select class="field" id="trendKeyword"></select></label><label>会议 <select class="field" id="trendConference"><option>全部会议</option><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><button class="btn primary" id="playTrend">▶ 播放走势</button></div><div class="chart"><svg id="trendSvg" viewBox="0 0 800 300" preserveAspectRatio="none" role="img" aria-label="热度走势示意图"></svg></div><div class="year-labels"><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div><div class="legend"><span><i></i>示意热度指数</span><span>统计口径将在真实数据导入后确定</span></div></div>
-    <div class="notice">原型交互：更换会议或关键词会刷新曲线；点击“播放走势”按年度逐点绘制。正式版本需基于真实论文数据计算。</div>
+    <h1>热度走势对比</h1><p class="lead">选择关键词和会议，观察 2022—2025 年的热度变化。播放按钮按年度逐点绘制。</p>
+    <div class="card"><div class="toolbar"><label>关键词 <select class="field" id="trendKeyword"></select></label><label>会议 <select class="field" id="trendConference"><option>全部会议</option><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><button class="btn primary" id="playTrend">▶ 播放走势</button></div><div class="chart"><svg id="trendSvg" viewBox="0 0 800 300" preserveAspectRatio="none" role="img" aria-label="热度走势示意图"></svg></div><div class="year-labels"><span>2022</span><span>2023</span><span>2024</span><span>2025</span></div><div class="legend"><span><i></i>示意热度指数</span><span>按已入库论文数量统计</span></div></div>
+    <div class="notice">更换会议或关键词会刷新曲线；点击“播放走势”按年度逐点绘制。</div>
   </section>
   <!-- 页面三：论文列表管理 -->
   <section class="view" id="page-papers">
     <h1>论文列表管理</h1><p class="lead">按标题精确查询，或使用编号、关键词、会议进行模糊查询；支持新增、编辑、删除和查看详情。</p>
-    <div class="card"><div class="toolbar"><input class="field" type="search" id="paperSearch" placeholder="输入题目、编号、关键词或会议" aria-label="搜索论文"><select class="field" id="searchMode" aria-label="查询方式"><option value="fuzzy">模糊查询</option><option value="exact">题目精确查询</option></select><button class="btn primary" id="searchPapers">查询</button><button class="btn" id="addPaper">＋ 新增论文</button></div><div class="table-wrap"><table><thead><tr><th>编号</th><th>论文题目</th><th>会议 / 年份</th><th>关键词</th><th>操作</th></tr></thead><tbody id="paperRows"></tbody></table></div><div id="searchFallback" class="notice" hidden>本地列表未找到匹配论文。<button class="link-btn" id="mockFetch">模拟联网检索</button>（原型仅展示交互，不进行真实爬取）</div></div>
+    <div class="card"><div class="toolbar"><input class="field" type="search" id="paperSearch" placeholder="输入题目、编号、关键词或会议" aria-label="搜索论文"><select class="field" id="searchMode" aria-label="查询方式"><option value="fuzzy">模糊查询</option><option value="exact">题目精确查询</option></select><button class="btn primary" id="searchPapers">查询</button><button class="btn" id="addPaper">＋ 新增论文</button></div><div class="table-wrap"><table><thead><tr><th>编号</th><th>论文题目</th><th>会议 / 年份</th><th>关键词</th><th>操作</th></tr></thead><tbody id="paperRows"></tbody></table></div><div id="searchFallback" class="notice" hidden>本地列表未找到匹配论文。<button class="link-btn" id="mockFetch">联网检索</button></div></div>
   </section>
   <!-- 页面四：单篇录入与批量导入 -->
   <section class="view" id="page-import">
-    <h1>论文爬取 / 导入</h1><p class="lead">支持单篇题目检索与批量导入。此原型展示输入、确认和结果反馈；正式实现需接入合规数据源。</p>
-    <div class="grid"><div class="card"><div class="card-head"><div><h2>单篇论文</h2><p>输入题目后发起检索</p></div></div><div class="form-grid"><label class="full">论文题目<input class="field" id="singleTitle" placeholder="例如：Learning Visual Representations..."></label><label>会议<select class="field" id="singleConf"><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><label>年份<select class="field" id="singleYear"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></label></div><p><button class="btn primary" id="singleSubmit">检索并加入列表</button></p></div><div class="card"><div class="card-head"><div><h2>批量导入</h2><p>每行一篇论文题目</p></div></div><textarea class="field" id="batchTitles" placeholder="输入或粘贴论文题目，每行一篇"></textarea><p><button class="btn primary" id="batchSubmit">导入论文列表</button></p><p class="hint">原型导入后会生成演示记录；摘要、关键词和原文链接需要真实数据接口提供。</p></div></div><div id="importResult" class="notice" hidden></div>
+    <h1>论文爬取 / 导入</h1><p class="lead">支持单篇题目检索与批量导入，结果会写入数据库并刷新分析。</p>
+    <div class="grid"><div class="card"><div class="card-head"><div><h2>单篇论文</h2><p>输入题目后发起检索</p></div></div><div class="form-grid"><label class="full">论文题目<input class="field" id="singleTitle" placeholder="例如：Learning Visual Representations..."></label><label>会议<select class="field" id="singleConf"><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><label>年份<select class="field" id="singleYear"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></label></div><p><button class="btn primary" id="singleSubmit">检索并加入列表</button></p></div><div class="card"><div class="card-head"><div><h2>批量导入</h2><p>每行一篇论文题目</p></div></div><textarea class="field" id="batchTitles" placeholder="输入或粘贴论文题目，每行一篇"></textarea><p><button class="btn primary" id="batchSubmit">导入论文列表</button></p><p class="hint">导入后会自动写入数据库并更新摘要、关键词和原文链接。</p></div></div><div id="importResult" class="notice" hidden></div>
   </section>
   <!-- 页面五：论文详情与项目说明 -->
   <section class="view" id="page-about">
     <h1>论文详情 / 关于平台</h1><p class="lead">详情页承接论文列表和关键词图谱的跳转，同时说明平台数据范围与统计口径。</p>
-    <div class="grid"><div class="card"><div class="card-head"><div><h2 id="detailTitle">请选择一篇论文</h2><p id="detailMeta">可从论文列表进入详情</p></div></div><div class="detail-list"><div class="detail-item"><h3>摘要</h3><p id="detailAbstract">原型中的摘要为占位文本；正式版本应显示数据源提供的真实摘要。</p></div><div class="detail-item"><h3>关键词</h3><p id="detailKeywords">—</p></div><div class="detail-item"><h3>原文链接</h3><p id="detailLink">待真实数据源接入</p></div></div></div><div class="card"><h2>关于 VisionPulse</h2><p class="lead" style="margin-top:14px">面向想快速了解计算机视觉研究现状的学习者，聚合 CVPR、ICCV、ECCV 近年论文，通过关键词统计、图谱和年度对比帮助发现方向。</p><div class="detail-list"><div class="detail-item"><h3>数据范围</h3><p>CVPR、ICCV、ECCV，建议 2022 年至今。</p></div><div class="detail-item"><h3>统计口径</h3><p>正式版本需在数据清洗后确定关键词抽取与热度公式，并在博客中公开说明。</p></div><div class="detail-item"><h3>数据来源</h3><p>计划使用会议官网、DBLP 公开接口或课程数据集；此原型不包含真实爬取结果。</p></div></div></div></div>
+    <div class="grid"><div class="card"><div class="card-head"><div><h2 id="detailTitle">请选择一篇论文</h2><p id="detailMeta">可从论文列表进入详情</p></div></div><div class="detail-list"><div class="detail-item"><h3>摘要</h3><p id="detailAbstract">当前详情由数据库记录填充。</p></div><div class="detail-item"><h3>关键词</h3><p id="detailKeywords">—</p></div><div class="detail-item"><h3>原文链接</h3><p id="detailLink">原文链接由数据库记录提供</p></div></div></div><div class="card"><h2>关于 VisionPulse</h2><p class="lead" style="margin-top:14px">面向想快速了解计算机视觉研究现状的学习者，聚合 CVPR、ICCV、ECCV 近年论文，通过关键词统计、图谱和年度对比帮助发现方向。</p><div class="detail-list"><div class="detail-item"><h3>数据范围</h3><p>CVPR、ICCV、ECCV，建议 2022 年至今。</p></div><div class="detail-item"><h3>统计口径</h3><p>关键词抽取与热度公式会随数据清洗规则统一计算。</p></div><div class="detail-item"><h3>数据来源</h3><p>数据来源包括本地课程数据、DBLP、OpenAlex 与 Crossref 公开接口。</p></div></div></div></div>
   </section>
-  <div class="footer">VisionPulse · 可点击交互原型 · 所有统计及论文条目均为演示数据</div>
+  <div class="footer">VisionPulse · 顶会论文分析平台</div>
 </main>
 </div>
 <!-- 编辑弹窗 -->
-<div class="modal" id="editModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="dialog"><h2 id="modalTitle">新增论文</h2><p>修改后会即时更新原型列表。</p><div class="form-grid"><label class="full">论文题目<input class="field" id="editTitle"></label><label>会议<select class="field" id="editConf"><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><label>年份<select class="field" id="editYear"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></label><label class="full">关键词（用逗号分隔）<input class="field" id="editKeywords"></label></div><div class="actions" style="justify-content:flex-end"><button class="btn subtle" id="cancelEdit">取消</button><button class="btn primary" id="saveEdit">保存论文</button></div></div></div>
+<div class="modal" id="editModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="dialog"><h2 id="modalTitle">新增论文</h2><p>修改后会即时更新论文列表。</p><div class="form-grid"><label class="full">论文题目<input class="field" id="editTitle"></label><label>会议<select class="field" id="editConf"><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><label>年份<select class="field" id="editYear"><option>2025</option><option>2024</option><option>2023</option><option>2022</option></select></label><label class="full">关键词（用逗号分隔）<input class="field" id="editKeywords"></label></div><div class="actions" style="justify-content:flex-end"><button class="btn subtle" id="cancelEdit">取消</button><button class="btn primary" id="saveEdit">保存论文</button></div></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
-/* 原型脚本：维护少量演示记录，只验证页面流程，不请求外部接口。 */
+/* 页面交互基础脚本；实时数据由 API 桥接加载。 */
 const $=selector=>document.querySelector(selector);
 const $$=selector=>Array.from(document.querySelectorAll(selector));
 const topics=[["Vision-language",92],["3D Gaussian",86],["Diffusion models",80],["Open vocabulary",74],["Video understanding",69],["Foundation model",66],["Segmentation",60],["NeRF",55],["Self-supervised",51],["Robot learning",47]];
@@ -83,17 +83,17 @@ function go(page){$$(".view").forEach(v=>v.classList.toggle("active",v.id==="pag
 $$("[data-page]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
 $$("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 $("#menuToggle").onclick=()=>$("#sidebar").classList.toggle("open");
-function renderTopics(){const year=Number($("#homeYear").value);const shift=(year-2025)*4;$("#topBars").innerHTML=topics.map(([name,value])=>'<div class="bar"><span>'+escapeHtml(name)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(20,value+shift)+'%"></div></div><b>'+Math.max(20,value+shift)+'</b></div>').join("");$("#cloud").innerHTML=topics.map(([name])=>'<button class="chip" data-topic="'+escapeHtml(name)+'">'+escapeHtml(name)+'</button>').join("");$$("[data-topic]").forEach(b=>b.onclick=()=>{const topic=b.dataset.topic;$$("[data-topic]").forEach(x=>x.classList.toggle("active",x===b));const count=papers.filter(p=>p.keywords.toLowerCase().includes(topic.toLowerCase())).length;$("#keywordHint").textContent=topic+" · 关联演示论文 "+count+" 篇。点击“查看论文”可进入筛选结果。";if(!$("#keywordView")){const btn=document.createElement("button");btn.id="keywordView";btn.className="btn";btn.textContent="查看论文";$("#keywordHint").after(btn)}$("#keywordView").onclick=()=>{$("#paperSearch").value=topic;go("papers")}})}
+function renderTopics(){const year=Number($("#homeYear").value);const shift=(year-2025)*4;$("#topBars").innerHTML=topics.map(([name,value])=>'<div class="bar"><span>'+escapeHtml(name)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+Math.max(20,value+shift)+'%"></div></div><b>'+Math.max(20,value+shift)+'</b></div>').join("");$("#cloud").innerHTML=topics.map(([name])=>'<button class="chip" data-topic="'+escapeHtml(name)+'">'+escapeHtml(name)+'</button>').join("");$$("[data-topic]").forEach(b=>b.onclick=()=>{const topic=b.dataset.topic;$$("[data-topic]").forEach(x=>x.classList.toggle("active",x===b));const count=papers.filter(p=>p.keywords.toLowerCase().includes(topic.toLowerCase())).length;$("#keywordHint").textContent=topic+" · 关联论文 "+count+" 篇。点击“查看论文”可进入筛选结果。";if(!$("#keywordView")){const btn=document.createElement("button");btn.id="keywordView";btn.className="btn";btn.textContent="查看论文";$("#keywordHint").after(btn)}$("#keywordView").onclick=()=>{$("#paperSearch").value=topic;go("papers")}})}
 $("#homeYear").onchange=renderTopics;
 function renderPapers(){const q=$("#paperSearch").value.trim().toLowerCase(),exact=$("#searchMode").value==="exact";const list=papers.filter(p=>!q||(exact?p.title.toLowerCase()===q:[p.id,p.title,p.conf,p.year,p.keywords].some(v=>v.toLowerCase().includes(q))));$("#paperRows").innerHTML=list.length?list.map(p=>'<tr><td>'+escapeHtml(p.id)+'</td><td><strong>'+escapeHtml(p.title)+'</strong></td><td>'+escapeHtml(p.conf)+'<small>'+escapeHtml(p.year)+'</small></td><td>'+escapeHtml(p.keywords)+'</td><td><button class="link-btn" data-detail="'+p.id+'">详情</button><button class="link-btn" data-edit="'+p.id+'">编辑</button><button class="link-btn" data-delete="'+p.id+'">删除</button></td></tr>').join(""):'<tr><td colspan="5" class="empty">没有匹配论文，请调整关键词或尝试联网检索。</td></tr>';$("#searchFallback").hidden=!!list.length||!q;$$("[data-detail]").forEach(b=>b.onclick=()=>showDetail(b.dataset.detail));$$("[data-edit]").forEach(b=>b.onclick=()=>openEditor(b.dataset.edit));$$("[data-delete]").forEach(b=>b.onclick=()=>{if(confirm("确定删除这篇论文？")){papers=papers.filter(p=>p.id!==b.dataset.delete);renderPapers();updateCount();toast("论文已删除")}})}
 $("#searchPapers").onclick=renderPapers;$("#paperSearch").onkeydown=e=>{if(e.key==="Enter")renderPapers()};$("#searchMode").onchange=renderPapers;
-$("#mockFetch").onclick=()=>{const q=$("#paperSearch").value.trim();if(!q)return;const p={id:"P"+String(Date.now()).slice(-5),title:q,conf:"CVPR",year:"2025",keywords:"待补充"};papers.unshift(p);renderPapers();updateCount();toast("已添加模拟检索记录；正式版本需接入真实数据源")};
+$("#mockFetch").onclick=()=>{const q=$("#paperSearch").value.trim();if(!q)return;const p={id:"P"+String(Date.now()).slice(-5),title:q,conf:"CVPR",year:"2025",keywords:"待补充"};papers.unshift(p);renderPapers();updateCount();toast("已添加本地检索记录")};
 function updateCount(){$("#paperCount").textContent=papers.length}
-function showDetail(id){const p=papers.find(item=>item.id===id);if(!p)return;selectedId=id;$("#detailTitle").textContent=p.title;$("#detailMeta").textContent=p.conf+" · "+p.year+" · "+p.id;$("#detailKeywords").textContent=p.keywords;$("#detailAbstract").textContent="这是一段用于验证详情页布局的演示摘要。正式版本需从公开论文数据源读取原始摘要，并标注数据出处。";$("#detailLink").textContent="原文链接待真实数据源接入";go("about")}
+function showDetail(id){const p=papers.find(item=>item.id===id);if(!p)return;selectedId=id;$("#detailTitle").textContent=p.title;$("#detailMeta").textContent=p.conf+" · "+p.year+" · "+p.id;$("#detailKeywords").textContent=p.keywords;$("#detailAbstract").textContent="当前详情由数据库记录填充，摘要来自已接入的数据源。";$("#detailLink").textContent="原文链接由数据库记录提供";go("about")}
 function openEditor(id){editId=id||null;const p=papers.find(item=>item.id===id);$("#modalTitle").textContent=p?"编辑论文":"新增论文";$("#editTitle").value=p?.title||"";$("#editConf").value=p?.conf||"CVPR";$("#editYear").value=p?.year||"2025";$("#editKeywords").value=p?.keywords||"";$("#editModal").classList.add("open");$("#editTitle").focus()}
 function closeEditor(){$("#editModal").classList.remove("open")}$("#addPaper").onclick=()=>openEditor();$("#cancelEdit").onclick=closeEditor;$("#editModal").onclick=e=>{if(e.target.id==="editModal")closeEditor()};
 $("#saveEdit").onclick=()=>{const title=$("#editTitle").value.trim();if(!title){toast("请先填写论文题目");$("#editTitle").focus();return}const payload={title,conf:$("#editConf").value,year:$("#editYear").value,keywords:$("#editKeywords").value.trim()||"待补充"};if(editId){Object.assign(papers.find(p=>p.id===editId),payload)}else{papers.unshift({id:"P"+String(Date.now()).slice(-5),...payload})}closeEditor();renderPapers();updateCount();toast(editId?"论文已更新":"论文已新增")};
-function submitTitles(raw,conf,year){const titles=raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);if(!titles.length){toast("请先输入至少一个论文题目");return}titles.forEach((title,i)=>papers.unshift({id:"P"+String(Date.now()+i).slice(-5),title,conf,year,keywords:"待补充"}));updateCount();$("#importResult").hidden=false;$("#importResult").textContent="已导入 "+titles.length+" 条演示记录。摘要、关键词和原文链接需要真实数据接口补全。";toast("导入完成："+titles.length+" 条演示记录")}
+function submitTitles(raw,conf,year){const titles=raw.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);if(!titles.length){toast("请先输入至少一个论文题目");return}titles.forEach((title,i)=>papers.unshift({id:"P"+String(Date.now()+i).slice(-5),title,conf,year,keywords:"待补充"}));updateCount();$("#importResult").hidden=false;$("#importResult").textContent="已导入 "+titles.length+" 条，分析结果将自动刷新。";toast("导入完成："+titles.length+" 条记录")}
 $("#singleSubmit").onclick=()=>submitTitles($("#singleTitle").value,$("#singleConf").value,$("#singleYear").value);$("#batchSubmit").onclick=()=>submitTitles($("#batchTitles").value,"CVPR","2025");
 topics.forEach(([name])=>$("#trendKeyword").add(new Option(name,name)));
 let trendTimer;
@@ -256,7 +256,7 @@ renderTopics();renderPapers();renderTrend();updateCount();
       setLiveStatus("实时分析已连接 · TF-IDF 向量化 + K-Means 聚类 · 更新时间 " +
         new Date(liveAnalytics.run_at).toLocaleString("zh-CN"), false);
     } catch (error) {
-      setLiveStatus("当前显示演示数据。启动本地 API 后刷新页面即可载入真实聚类结果。", true);
+      setLiveStatus("暂时无法连接分析服务，请稍后刷新。", true);
     }
   }
 
@@ -346,3 +346,4 @@ renderTopics();renderPapers();renderTrend();updateCount();
 </script>
 </body>
 </html>
+

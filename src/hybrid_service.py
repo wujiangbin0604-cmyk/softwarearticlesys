@@ -6,6 +6,7 @@ import hashlib
 import time
 from dataclasses import asdict
 
+from scripts.alternative_fetch import search_with_fallback
 from scripts.dblp_fetch import DEFAULT_USER_AGENT, iter_query_hits
 from src.storage import PaperStore, normalize_title
 
@@ -44,20 +45,35 @@ class HybridPaperService:
             return {"source": "local", "cache_hit": bool(local), "papers": local}
 
         self._respect_rate_limit()
-        papers, _ = iter_query_hits(
-            query,
-            limit=limit,
-            sleep_seconds=self.request_sleep,
-            user_agent=self.user_agent,
-        )
+        source = "dblp"
+        errors: list[str] = []
+        try:
+            papers, _ = iter_query_hits(
+                query,
+                limit=limit,
+                sleep_seconds=self.request_sleep,
+                user_agent=self.user_agent,
+            )
+        except RuntimeError as dblp_error:
+            errors.append(str(dblp_error))
+            source, papers, fallback_errors = search_with_fallback(
+                query, limit=limit, user_agent=self.user_agent
+            )
+            errors.extend(fallback_errors)
+            if not papers:
+                raise RuntimeError("DBLP and alternative sources failed: " + " | ".join(errors))
+
         self.last_remote_request = time.monotonic()
         self.store.upsert_many(papers, source_query=query)
-        return {
-            "source": "dblp",
+        result = {
+            "source": source,
             "cache_hit": False,
             "papers": [self.store._row_to_dict(row) for row in self.store.search(query, limit=limit)],
             "remote_count": len(papers),
         }
+        if errors:
+            result["fallback_errors"] = errors
+        return result
 
     def import_titles(self, titles: list[str], venue: str = "CVPR", year: int = 2025) -> int:
         """Import titles as searchable placeholders until metadata enrichment runs."""
