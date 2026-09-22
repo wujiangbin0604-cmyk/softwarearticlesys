@@ -1,0 +1,11 @@
+services:
+  visionpulse:
+    build: .
+    container_name: visionpulse
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
