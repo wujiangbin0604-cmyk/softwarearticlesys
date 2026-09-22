@@ -108,7 +108,7 @@ function renderPapers(){const q=$("#paperSearch").value.trim().toLowerCase(),exa
 $("#searchPapers").onclick=renderPapers;$("#paperSearch").onkeydown=e=>{if(e.key==="Enter")renderPapers()};$("#searchMode").onchange=renderPapers;
 $("#mockFetch").onclick=()=>{const q=$("#paperSearch").value.trim();if(!q)return;const p={id:"P"+String(Date.now()).slice(-5),title:q,conf:"CVPR",year:"2025",keywords:"待补充"};papers.unshift(p);renderPapers();updateCount();toast("已添加本地检索记录")};
 function updateCount(){$("#paperCount").textContent=papers.length}
-function showDetail(id){const p=papers.find(item=>item.id===id);if(!p)return;selectedId=id;$("#detailTitle").textContent=p.title;$("#detailMeta").textContent=p.conf+" · "+p.year+" · "+p.id;$("#detailKeywords").textContent=p.keywords;$("#detailAbstract").textContent="当前详情由数据库记录填充，摘要来自已接入的数据源。";$("#detailLink").textContent="原文链接由数据库记录提供";go("about")}
+function showDetail(id){const p=papers.find(item=>item.id===id);if(!p)return;selectedId=id;$("#detailTitle").textContent=p.title;$("#detailMeta").textContent=p.conf+" · "+p.year+" · "+p.id;$("#detailKeywords").textContent=p.keywords;$("#detailAbstract").textContent=p.abstract||"当前数据源未提供摘要，可通过原文链接查看。";$("#detailLink").innerHTML=p.link?"<a href=\""+escapeHtml(p.link)+"\" target=\"_blank\" rel=\"noreferrer\">打开原文页面</a>":"当前记录没有可用原文链接。";go("about")}
 function openEditor(id){editId=id||null;const p=papers.find(item=>item.id===id);$("#modalTitle").textContent=p?"编辑论文":"新增论文";$("#editTitle").value=p?.title||"";$("#editConf").value=p?.conf||"CVPR";$("#editYear").value=p?.year||"2025";$("#editKeywords").value=p?.keywords||"";$("#editModal").classList.add("open");$("#editTitle").focus()}
 function closeEditor(){$("#editModal").classList.remove("open")}$("#addPaper").onclick=()=>openEditor();$("#cancelEdit").onclick=closeEditor;$("#editModal").onclick=e=>{if(e.target.id==="editModal")closeEditor()};
 $("#saveEdit").onclick=async()=>{const title=$("#editTitle").value.trim();if(!title){toast("请先填写论文题目");$("#editTitle").focus();return}const payload={title,venue:$("#editConf").value,year:$("#editYear").value,keywords:$("#editKeywords").value.trim()||"待补充"};try{if(editId){const result=await mutatePaper("/api/papers/update",{id:Number(editId),...payload});Object.assign(papers.find(p=>p.id===editId),payload,result.paper);toast("论文已更新并刷新分析")}else{const result=await mutatePaper("/api/papers/import",{titles:[title],venue:payload.venue,year:Number(payload.year)});toast("论文已新增并刷新分析")}closeEditor();renderPapers();updateCount()}catch(error){toast("保存失败："+error.message)}};
@@ -142,7 +142,9 @@ renderTopics();renderPapers();renderTrend();updateCount();
       title: row.title || "未命名论文",
       conf: row.venue || row.conf || "未知会议",
       year: String(row.year || ""),
-      keywords: textOf(row.keywords || "待补充")
+      keywords: textOf(row.keywords || "待补充"),
+      abstract: row.abstract || "",
+      link: row.dblp_url || row.url || ""
     };
   }
 
@@ -312,7 +314,9 @@ renderTopics();renderPapers();renderTrend();updateCount();
       title: row.title || "未命名论文",
       conf: row.venue || row.conf || "未知会议",
       year: String(row.year || ""),
-      keywords: Array.isArray(row.keywords) ? row.keywords.join(", ") : String(row.keywords || "待补充")
+      keywords: Array.isArray(row.keywords) ? row.keywords.join(", ") : String(row.keywords || "待补充"),
+      abstract: row.abstract || "",
+      link: row.dblp_url || row.url || ""
     };
   }
 
