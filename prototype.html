@@ -260,20 +260,32 @@ renderTopics();renderPapers();renderTrend();updateCount();
       (records.length ? "基于已分析论文按年份统计" : "等待更多 CVPR、ICCV、ECCV 数据") + "</span>";
   }
 
+  let analyticsRetries = 0;
   async function hydrateAnalytics() {
     try {
       liveAnalytics = await getJSON("/api/analytics/summary");
       liveTrendData = await getJSON("/api/analytics/trends");
+      analyticsRetries = 0;
       $("#paperCount").textContent = liveAnalytics.paper_count;
       $("#paperCount").nextElementSibling.textContent = "已分析论文";
       renderLiveTopics(liveAnalytics);
       renderLiveKeywords(liveAnalytics);
       setupTrendKeywords(liveAnalytics);
       renderLiveTrend(4);
-      setLiveStatus("实时分析已连接 · TF-IDF 向量化 + K-Means 聚类 · 更新时间 " +
-        new Date(liveAnalytics.run_at).toLocaleString("zh-CN"), false);
+      if (Number(liveAnalytics.paper_count) === 0) {
+        setLiveStatus("分析服务已连接 · 当前数据库为空，请先导入论文。", true);
+      } else {
+        const runAt = liveAnalytics.run_at ? new Date(liveAnalytics.run_at).toLocaleString("zh-CN") : "刚刚";
+        setLiveStatus("实时分析已连接 · TF-IDF 向量化 + K-Means 聚类 · 更新时间 " + runAt, false);
+      }
     } catch (error) {
-      setLiveStatus("暂时无法连接分析服务，请稍后刷新。", true);
+      if (analyticsRetries < 2) {
+        analyticsRetries += 1;
+        setLiveStatus("分析服务启动中，正在重试（" + analyticsRetries + "/2）…", true);
+        window.setTimeout(hydrateAnalytics, 1800);
+      } else {
+        setLiveStatus("分析服务暂时不可用，请稍后刷新；如果数据库为空，请先导入论文。", true);
+      }
     }
   }
 

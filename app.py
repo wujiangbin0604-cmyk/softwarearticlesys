@@ -82,19 +82,28 @@ class ApiHandler(BaseHTTPRequestHandler):
                 self._send_json({"error": str(exc)}, status=502)
             return
         if parsed.path == "/api/analytics/summary":
-            self._send_json(self.service.store.analysis_summary())
+            try:
+                self._send_json(self.service.store.analysis_summary())
+            except Exception as exc:  # keep the frontend diagnostic instead of a dropped proxy connection
+                self._send_json({"error": "analysis unavailable", "detail": str(exc)}, status=500)
             return
         if parsed.path == "/api/analytics/keywords":
             params = parse_qs(parsed.query)
             keyword = params.get("keyword", [""])[0].strip().casefold()
             limit = parse_limit(params.get("limit", ["50"])[0])
-            self._send_json({"keyword": keyword, "papers": self.service.store.keyword_papers(keyword, limit)})
+            try:
+                self._send_json({"keyword": keyword, "papers": self.service.store.keyword_papers(keyword, limit)})
+            except Exception as exc:
+                self._send_json({"error": "analysis unavailable", "detail": str(exc)}, status=500)
             return
         if parsed.path == "/api/analytics/trends":
             params = parse_qs(parsed.query)
             raw_keywords = params.get("keywords", [""])[0]
             keywords = [item.strip() for item in raw_keywords.split(",") if item.strip()]
-            self._send_json(self.service.store.analysis_trends(keywords or None))
+            try:
+                self._send_json(self.service.store.analysis_trends(keywords or None))
+            except Exception as exc:
+                self._send_json({"error": "analysis unavailable", "detail": str(exc)}, status=500)
             return
         self._send_json({"error": "Not found"}, status=404)
 

@@ -113,6 +113,8 @@ class AnalysisEngine:
 
     def summary(self, limit: int = 10) -> dict:
         with self.store.connection() as connection:
+            # A fresh deployment can have papers=0 and no derived tables yet.
+            connection.executescript(ANALYSIS_SCHEMA)
             topics = []
             for row in connection.execute(
                 "SELECT * FROM topic_clusters ORDER BY paper_count DESC, score DESC LIMIT ?",
@@ -138,6 +140,7 @@ class AnalysisEngine:
 
     def papers_for_keyword(self, keyword: str, limit: int = 50) -> list[dict]:
         with self.store.connection() as connection:
+            connection.executescript(ANALYSIS_SCHEMA)
             rows = connection.execute(
                 """
                 SELECT p.* FROM keyword_papers kp
@@ -151,6 +154,7 @@ class AnalysisEngine:
 
     def trends(self, keywords: Iterable[str] | None = None) -> dict:
         with self.store.connection() as connection:
+            connection.executescript(ANALYSIS_SCHEMA)
             params: tuple = ()
             where = ""
             selected = [k.casefold().strip() for k in keywords or [] if k.strip()]

@@ -14,6 +14,13 @@ class AnalysisEngineTests(unittest.TestCase):
     def tearDown(self):
         self.temp_dir.cleanup()
 
+    def test_empty_store_returns_zero_state_for_summary_and_trends(self):
+        summary = self.store.analysis_summary()
+        self.assertEqual(summary["paper_count"], 0)
+        self.assertEqual(summary["cluster_count"], 0)
+        self.assertEqual(summary["topics"], [])
+        self.assertEqual(summary["keywords"], [])
+        self.assertEqual(self.store.analysis_trends(), {"years": [], "venues": [], "records": []})
     def test_refresh_builds_topics_keywords_and_conference_trends(self):
         papers = [
             Paper(
