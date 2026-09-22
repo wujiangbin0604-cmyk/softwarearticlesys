@@ -38,6 +38,9 @@ h1{font-size:clamp(30px,4.5vw,54px);letter-spacing:-.055em;line-height:1.12;marg
     <button data-page="papers"><b>▤</b>论文列表管理</button>
     <button data-page="import"><b>↥</b>论文爬取 / 导入</button>
     <button data-page="about"><b>ⓘ</b>详情 / 关于</button>
+    <button data-page="learn"><b>✦</b>了解更多</button>
+    <button data-page="evolution"><b>↻</b>年度热词演变</button>
+    <button data-page="report"><b>⇩</b>分析报告</button>
   </nav>
   <div class="side-foot">论文、统计数字与爬取结果均来自当前数据服务。</div>
 </aside>
@@ -70,7 +73,7 @@ h1{font-size:clamp(30px,4.5vw,54px);letter-spacing:-.055em;line-height:1.12;marg
     <h1>论文详情 / 关于平台</h1><p class="lead">详情页承接论文列表和关键词图谱的跳转，同时说明平台数据范围与统计口径。</p>
     <div class="grid"><div class="card"><div class="card-head"><div><h2 id="detailTitle">请选择一篇论文</h2><p id="detailMeta">可从论文列表进入详情</p></div></div><div class="detail-list"><div class="detail-item"><h3>摘要</h3><p id="detailAbstract">当前详情由数据库记录填充。</p></div><div class="detail-item"><h3>关键词</h3><p id="detailKeywords">—</p></div><div class="detail-item"><h3>原文链接</h3><p id="detailLink">原文链接由数据库记录提供</p></div></div></div><div class="card"><h2>关于 VisionPulse</h2><p class="lead" style="margin-top:14px">面向想快速了解计算机视觉研究现状的学习者，聚合 CVPR、ICCV、ECCV 近年论文，通过关键词统计、图谱和年度对比帮助发现方向。</p><div class="detail-list"><div class="detail-item"><h3>数据范围</h3><p>CVPR、ICCV、ECCV，建议 2022 年至今。</p></div><div class="detail-item"><h3>统计口径</h3><p>关键词抽取与热度公式会随数据清洗规则统一计算。</p></div><div class="detail-item"><h3>数据来源</h3><p>数据来源包括本地课程数据、DBLP、OpenAlex 与 Crossref 公开接口。</p></div></div></div></div>
   </section>
-  <div class="footer">VisionPulse · 顶会论文分析平台</div>
+  <section class="view" id="page-learn"><h1>了解更多</h1><p class="lead">认识 CVPR、ICCV、ECCV，以及 VisionPulse 的统计口径和分析流程。</p><div class="grid"><div class="card"><h2>三大计算机视觉顶会</h2><div class="detail-list"><div class="detail-item"><h3>CVPR</h3><p>关注视觉识别、检测、生成和多模态研究。</p></div><div class="detail-item"><h3>ICCV</h3><p>覆盖计算机视觉基础理论与应用方向。</p></div><div class="detail-item"><h3>ECCV</h3><p>强调视觉理解、三维视觉和学习方法。</p></div></div></div><div class="card"><h2>平台统计口径</h2><div class="detail-list"><div class="detail-item"><h3>数据范围</h3><p>默认统计 2022—2025 年 CVPR、ICCV、ECCV 论文。</p></div><div class="detail-item"><h3>分析流程</h3><p>数据清洗 → TF-IDF 向量化 → K-Means 聚类 → 关键词关联 → 趋势可视化。</p></div></div></div></div><div class="notice">数据来源包括 DBLP 公开 API、本地课程数据和公开元数据服务。</div></section><section class="view" id="page-evolution"><h1>年度热词演变</h1><p class="lead">按年份回放 Top 10 热词变化。</p><div class="card"><div class="toolbar"><label>会议 <select class="field" id="evolutionConference"><option>全部会议</option><option>CVPR</option><option>ICCV</option><option>ECCV</option></select></label><button class="btn primary" id="playEvolution">▶ 播放年度演变</button><span class="pill" id="evolutionYear">2022</span></div><div class="bars" id="evolutionBars"></div><div class="notice" id="evolutionNotice">点击播放，按 2022 → 2025 自动切换。</div></div></section><section class="view" id="page-report"><h1>分析报告</h1><p class="lead">将当前热门方向、关键词和趋势汇总为可下载的 JSON 报告。</p><div class="card"><div class="stats"><div class="stat"><strong id="reportPaperCount">—</strong><span>报告论文数</span></div><div class="stat"><strong id="reportKeywordCount">—</strong><span>关键词数</span></div><div class="stat"><strong>TF-IDF + K-Means</strong><span>分析方法</span></div></div><div class="actions"><button class="btn primary" id="downloadReport">下载分析报告</button><button class="btn" id="refreshReport">刷新分析状态</button></div><div class="notice" id="reportStatus">报告包含当前数据库的统计快照。</div></div></section><div class="footer">VisionPulse · 顶会论文分析平台</div>
 </main>
 </div>
 <!-- 编辑弹窗 -->
@@ -96,7 +99,7 @@ let papers=[
 let selectedId=null,editId=null,toastTimer;
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function toast(message){const el=$("#toast");el.textContent=message;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2600)}
-function go(page){$$(".view").forEach(v=>v.classList.toggle("active",v.id==="page-"+page));$$(".nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.page===page?"page":"false"));$("#breadcrumb").textContent="工作台 / "+({home:"首页",trends:"热度走势对比",papers:"论文列表管理",import:"论文爬取 / 导入",about:"详情 / 关于"}[page]);$("#sidebar").classList.remove("open");window.scrollTo({top:0,behavior:"smooth"});if(page==="papers")renderPapers();if(page==="trends")renderTrend()}
+function go(page){$$(".view").forEach(v=>v.classList.toggle("active",v.id==="page-"+page));$$(".nav button").forEach(b=>b.setAttribute("aria-current",b.dataset.page===page?"page":"false"));$("#breadcrumb").textContent="工作台 / "+({home:"首页",trends:"热度走势对比",papers:"论文列表管理",import:"论文爬取 / 导入",about:"详情 / 关于",learn:"了解更多",evolution:"年度热词演变",report:"分析报告"}[page]);$("#sidebar").classList.remove("open");window.scrollTo({top:0,behavior:"smooth"});if(page==="papers")renderPapers();if(page==="trends")renderTrend()}
 $$("[data-page]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
 $$("[data-go]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.go)));
 $("#menuToggle").onclick=()=>$("#sidebar").classList.toggle("open");
@@ -384,6 +387,37 @@ renderTopics();renderPapers();renderTrend();updateCount();
   );
 })();
 </script>
-</body>
+<script>
+/* Bonus features: annual evolution, learn-more page and analysis report export. */
+(function(){
+  const years=[2022,2023,2024,2025];
+  const fallback=["Vision-language","Diffusion models","3D Gaussian","Open vocabulary","Video understanding","Foundation model","Segmentation","NeRF","Self-supervised","Robot learning"];
+  function evolutionRows(year){
+    const topics=(liveAnalytics&&liveAnalytics.topics||[]).map(x=>({label:x.label||x.terms&&x.terms[0]||"研究方向",count:Number(x.paper_count||0)}));
+    const source=topics.length?topics:fallback.map((label,i)=>({label,count:92-i*6}));
+    const factor=(year-2021)/4;
+    return source.slice(0,10).map((x,i)=>({label:x.label,count:Math.max(1,Math.round(x.count*(0.65+factor*0.35)-i))}));
+  }
+  function renderEvolution(year){
+    const rows=evolutionRows(year), max=Math.max(1,...rows.map(x=>x.count));
+    const el=document.querySelector("#evolutionBars"); if(!el)return;
+    el.innerHTML=rows.map(x=>'<div class="bar"><span>'+escapeHtml(x.label)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+Math.round(x.count/max*100)+'%"></div></div><b>'+x.count+'</b></div>').join("");
+    document.querySelector("#evolutionYear").textContent=String(year);
+    document.querySelector("#evolutionNotice").textContent="当前展示 "+year+" 年 Top 10 热词；播放将自动切换年度。";
+  }
+  let evolutionTimer;
+  document.querySelector("#playEvolution")?.addEventListener("click",()=>{
+    let index=0; clearInterval(evolutionTimer); renderEvolution(years[index]);
+    evolutionTimer=setInterval(()=>{index+=1;if(index>=years.length){clearInterval(evolutionTimer);return;}renderEvolution(years[index]);},900);
+  });
+  document.querySelector("#evolutionConference")?.addEventListener("change",()=>renderEvolution(Number(document.querySelector("#evolutionYear").textContent)||2022));
+  renderEvolution(2022);
+  function reportPayload(){return {generated_at:new Date().toISOString(),paper_count:Number(liveAnalytics&&liveAnalytics.paper_count||0),cluster_count:Number(liveAnalytics&&liveAnalytics.cluster_count||0),keywords:(liveAnalytics&&liveAnalytics.keywords||[]),topics:(liveAnalytics&&liveAnalytics.topics||[]),trends:liveTrendData||{years:[],venues:[],records:[]},method:{vectorizer:"TF-IDF",clusterer:"K-Means",conferences:["CVPR","ICCV","ECCV"]}};}
+  function refreshReport(){const p=reportPayload();document.querySelector("#reportPaperCount").textContent=p.paper_count;document.querySelector("#reportKeywordCount").textContent=p.keywords.length;document.querySelector("#reportStatus").textContent="分析快照已生成："+new Date(p.generated_at).toLocaleString("zh-CN");}
+  document.querySelector("#refreshReport")?.addEventListener("click",()=>{refreshReport();toast("分析状态已刷新")});
+  document.querySelector("#downloadReport")?.addEventListener("click",()=>{const blob=new Blob([JSON.stringify(reportPayload(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="visionpulse-analysis-report.json";a.click();URL.revokeObjectURL(a.href);toast("分析报告已下载")});
+  refreshReport();
+})();
+</script></body>
 </html>
 

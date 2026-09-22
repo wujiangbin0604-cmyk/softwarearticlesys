@@ -12,6 +12,7 @@ import os
 import re
 import ssl
 from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -165,18 +166,18 @@ def search_crossref(query: str, *, limit: int = 20, user_agent: str = DEFAULT_US
 
 
 def search_with_fallback(query: str, *, limit: int, user_agent: str) -> tuple[str, list[Paper], list[str]]:
+    """Query public metadata providers concurrently to reduce abstract latency."""
     errors: list[str] = []
-    for source, fetch in (("OpenAlex", search_openalex), ("Crossref", search_crossref)):
-        try:
-            papers = fetch(query, limit=limit, user_agent=user_agent)
-            if papers:
-                return source, papers, errors
-            errors.append(f"{source}: no matching records")
-        except Exception as exc:  # network/provider-specific failures are isolated per source
-            errors.append(f"{source}: {exc}")
+    fetchers = {"OpenAlex": search_openalex, "Crossref": search_crossref}
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        pending = {pool.submit(fetch, query, limit=limit, user_agent=user_agent): name for name, fetch in fetchers.items()}
+        for future in as_completed(pending):
+            source = pending[future]
+            try:
+                papers = future.result()
+                if papers:
+                    return source, papers, errors
+                errors.append(f"{source}: no matching records")
+            except Exception as exc:
+                errors.append(f"{source}: {exc}")
     return "fallback-empty", [], errors
-
-
-
-
-
