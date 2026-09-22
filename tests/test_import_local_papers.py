@@ -7,8 +7,8 @@ from scripts.import_local_papers import build_paper, clean_title, infer_metadata
 
 class LocalPaperImportTests(unittest.TestCase):
     def test_clean_title_removes_export_suffix(self):
-        path = Path("CVPR 2024 paper Vision Transformers_review.pdf")
-        self.assertEqual(clean_title(path), "Vision Transformers_review")
+        path = Path("Vision Transformers CVPR 2024 paper_review.pdf")
+        self.assertEqual(clean_title(path), "Vision Transformers")
 
     def test_infer_metadata_reads_venue_and_year_from_path(self):
         venue, year = infer_metadata(Path("ICCV2025/object_tracking.pdf"))
@@ -31,3 +31,4 @@ class LocalPaperImportTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
