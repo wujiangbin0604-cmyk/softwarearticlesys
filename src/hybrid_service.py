@@ -65,10 +65,16 @@ class HybridPaperService:
 
         self.last_remote_request = time.monotonic()
         self.store.upsert_many(papers, source_query=query)
+        paper_keys = {paper.dblp_key for paper in papers if paper.dblp_key}
+        stored_papers = [
+            row
+            for row in self.store.all(limit=max(limit, len(papers)))
+            if row.get("dblp_key") in paper_keys
+        ][:limit]
         result = {
             "source": source,
             "cache_hit": False,
-            "papers": [self.store._row_to_dict(row) for row in self.store.search(query, limit=limit)],
+            "papers": stored_papers,
             "remote_count": len(papers),
         }
         if errors:
@@ -133,3 +139,4 @@ class HybridPaperService:
         remaining = self.request_sleep - elapsed
         if remaining > 0:
             time.sleep(remaining)
+
