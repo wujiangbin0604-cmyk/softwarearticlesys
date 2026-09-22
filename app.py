@@ -18,6 +18,15 @@ from src.storage import PaperStore
 ROOT = Path(__file__).resolve().parent
 
 
+def parse_limit(raw_value: str, default: int = 50, maximum: int = 100) -> int:
+    try:
+        value = int(raw_value)
+    except (TypeError, ValueError):
+        return default
+    return min(max(value, 1), maximum)
+
+
+
 class ApiHandler(BaseHTTPRequestHandler):
     service: HybridPaperService
 
@@ -78,7 +87,7 @@ class ApiHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/analytics/keywords":
             params = parse_qs(parsed.query)
             keyword = params.get("keyword", [""])[0].strip().casefold()
-            limit = int(params.get("limit", ["50"])[0])
+            limit = parse_limit(params.get("limit", ["50"])[0])
             self._send_json({"keyword": keyword, "papers": self.service.store.keyword_papers(keyword, limit)})
             return
         if parsed.path == "/api/analytics/trends":
