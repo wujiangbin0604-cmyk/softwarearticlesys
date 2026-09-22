@@ -62,3 +62,13 @@ GitHub Pages 可部署静态前端；Python API、SQLite、定时扫描和机器
 ## AI 协作说明
 
 AI 用于需求拆解、接口设计、代码草拟、调试建议和测试用例建议；关键实现经过人工检查，并通过 Python 单元测试、语法检查和接口回归验证。
+
+## 华为云 CodeHub 提交
+
+本项目的开发分支为 `dev`，论文系统代码、测试、脚本和部署文档均可提交到华为云 CodeHub；Figma 设计源文件不纳入代码推送。推送前应先运行：
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+然后确认工作区干净、提交信息描述实际改动，并推送到远程 `dev` 分支。数据库文件、PDF 原文、临时导出 JSON 和本地网盘路径不应提交。
