@@ -92,7 +92,7 @@ class ApiHandler(BaseHTTPRequestHandler):
         if urlparse(self.path).path == "/api/papers/import-records":
             expected_token = os.getenv("IMPORT_TOKEN")
             provided_token = self.headers.get("X-Import-Token")
-            if not expected_token or provided_token != expected_token:
+            if not is_valid_import_token(expected_token, provided_token):
                 self._send_json({"error": "bulk import requires a valid IMPORT_TOKEN"}, status=401)
                 return
             try:
@@ -128,7 +128,7 @@ class ApiHandler(BaseHTTPRequestHandler):
         print(format % args)
 
 
-def parse_args() -> argparse.Namespace:
+def is_valid_import_token(expected: str | None, provided: str | None) -> bool:`r`n    return bool(expected) and bool(provided) and hmac.compare_digest(expected, provided)`r`n`r`ndef parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the VisionPulse local-first API")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
@@ -154,3 +154,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
