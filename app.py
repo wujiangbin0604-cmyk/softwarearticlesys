@@ -128,7 +128,10 @@ class ApiHandler(BaseHTTPRequestHandler):
         print(format % args)
 
 
-def is_valid_import_token(expected: str | None, provided: str | None) -> bool:`r`n    return bool(expected) and bool(provided) and hmac.compare_digest(expected, provided)`r`n`r`ndef parse_args() -> argparse.Namespace:
+def is_valid_import_token(expected: str | None, provided: str | None) -> bool:
+    return bool(expected) and bool(provided) and hmac.compare_digest(expected, provided)
+
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the VisionPulse local-first API")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8000)
