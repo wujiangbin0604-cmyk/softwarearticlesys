@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
