@@ -229,6 +229,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     store = PaperStore(args.db)
+    if os.getenv("DEMO_VENUE_MAPPING", "0") == "1":
+        print(f"Demo venue mapping enabled; filled={store.apply_demo_venues()}")
     ApiHandler.service = HybridPaperService(store, online_enabled=not args.no_online)
     server = ThreadingHTTPServer((args.host, args.port), ApiHandler)
     print(f"VisionPulse API listening at http://{args.host}:{args.port}")

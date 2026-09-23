@@ -120,6 +120,22 @@ class PaperStore:
         self.refresh_analysis()
         return len(rows)
 
+    def apply_demo_venues(self) -> int:
+        """Fill only missing venues with deterministic demo conference labels."""
+        with self.connection() as connection:
+            cursor = connection.execute("""
+                WITH ranked AS (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn FROM papers
+                    WHERE venue IS NULL OR trim(venue) = ''
+                )
+                UPDATE papers SET venue = CASE ((ranked.rn - 1) % 3)
+                    WHEN 0 THEN 'CVPR' WHEN 1 THEN 'ICCV' ELSE 'ECCV' END
+                FROM ranked WHERE papers.id = ranked.id
+            """)
+            changed = cursor.rowcount
+            connection.commit()
+        if changed: self.refresh_analysis()
+        return int(changed)
     def refresh_analysis(self) -> dict:
         from src.analysis import AnalysisEngine
 
