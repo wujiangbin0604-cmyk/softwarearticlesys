@@ -1,4 +1,4 @@
-"""Local-first paper search with DBLP as an on-demand fallback."""
+"""Local-first paper search with OpenAlex and Crossref as online sources."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from dataclasses import asdict
 from difflib import SequenceMatcher
 
 from scripts.alternative_fetch import search_with_fallback
-from scripts.dblp_fetch import DEFAULT_USER_AGENT, iter_query_hits
+from scripts.alternative_fetch import DEFAULT_USER_AGENT
 from src.storage import PaperStore, normalize_title
 
 
 class HybridPaperService:
-    """Search SQLite first; query DBLP only when the local cache misses."""
+    """Search SQLite first; query OpenAlex/Crossref only on a local miss."""
 
     def __init__(
         self,
@@ -47,23 +47,11 @@ class HybridPaperService:
             return {"source": "local", "cache_hit": bool(local), "papers": local}
 
         self._respect_rate_limit()
-        source = "dblp"
-        errors: list[str] = []
-        try:
-            papers, _ = iter_query_hits(
-                query,
-                limit=limit,
-                sleep_seconds=self.request_sleep,
-                user_agent=self.user_agent,
-            )
-        except RuntimeError as dblp_error:
-            errors.append(str(dblp_error))
-            source, papers, fallback_errors = search_with_fallback(
-                query, limit=limit, user_agent=self.user_agent
-            )
-            errors.extend(fallback_errors)
-            if not papers:
-                raise RuntimeError("DBLP and alternative sources failed: " + " | ".join(errors))
+        source, papers, errors = search_with_fallback(
+            query, limit=limit, user_agent=self.user_agent
+        )
+        if not papers:
+            raise RuntimeError("OpenAlex and Crossref failed: " + " | ".join(errors))
 
         self.last_remote_request = time.monotonic()
         self.store.upsert_many(papers, source_query=query)
@@ -82,7 +70,6 @@ class HybridPaperService:
         if errors:
             result["fallback_errors"] = errors
         return result
-
     def enrich_abstract(self, paper_id: int) -> dict:
         row = self.store.get_paper(paper_id)
         if row is None:
