@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+  <defs><marker id="b" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#4b5563"/></marker></defs>
+  <rect width="1200" height="520" fill="#ffffff"/>
+  <text x="600" y="48" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="28" font-weight="700" fill="#111827">分析失败问题反馈与修复闭环</text>
+  <text x="600" y="78" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="15" fill="#6b7280">从前端提示到后端定位，再到测试复验</text>
+  <g font-family="Microsoft YaHei, sans-serif" text-anchor="middle">
+    <rect x="80" y="150" width="200" height="120" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/><text x="180" y="190" font-size="20" font-weight="700" fill="#b91c1c">1. 用户反馈</text><text x="180" y="228" font-size="14" fill="#374151">页面显示“分析失败”</text><text x="180" y="250" font-size="14" fill="#374151">记录请求时间与接口</text>
+    <rect x="350" y="150" width="200" height="120" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/><text x="450" y="190" font-size="20" font-weight="700" fill="#c2410c">2. 前端捕获</text><text x="450" y="228" font-size="14" fill="#374151">检查 HTTP 状态码</text><text x="450" y="250" font-size="14" fill="#374151">有限次数自动重试</text>
+    <rect x="620" y="150" width="200" height="120" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/><text x="720" y="190" font-size="20" font-weight="700" fill="#1d4ed8">3. 后端定位</text><text x="720" y="228" font-size="14" fill="#374151">查看服务日志</text><text x="720" y="250" font-size="14" fill="#374151">检查数据库与分析表</text>
+    <rect x="890" y="150" width="200" height="120" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/><text x="990" y="190" font-size="20" font-weight="700" fill="#6d28d9">4. 修复验证</text><text x="990" y="228" font-size="14" fill="#374151">修正代码或配置</text><text x="990" y="250" font-size="14" fill="#374151">运行 16 项回归测试</text>
+    <line x1="280" y1="210" x2="345" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#b)"/><line x1="550" y1="210" x2="615" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#b)"/><line x1="820" y1="210" x2="885" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#b)"/>
+    <rect x="365" y="360" width="470" height="82" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/><text x="600" y="394" font-size="20" font-weight="700" fill="#047857">5. 部署后复验</text><text x="600" y="420" font-size="14" fill="#374151">重新访问页面，确认分析结果与错误提示均符合预期</text>
+  </g>
+  <path d="M990 270 C990 335 835 340 800 360" fill="none" stroke="#4b5563" stroke-width="2" marker-end="url(#b)"/><path d="M365 400 C200 400 160 330 180 275" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#b)"/>
+  <text x="600" y="490" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="15" fill="#6b7280">可观测 · 可验证 · 可回滚</text>
+</svg>

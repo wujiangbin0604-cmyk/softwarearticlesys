@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420">
+  <defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#4b5563"/></marker></defs>
+  <rect width="1400" height="420" fill="#ffffff"/>
+  <text x="700" y="48" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="28" font-weight="700" fill="#111827">用户与 AI 协作开发流程</text>
+  <text x="700" y="78" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="15" fill="#6b7280">从需求提出到功能交付的迭代过程</text>
+  <g font-family="Microsoft YaHei, sans-serif" text-anchor="middle">
+    <rect x="45" y="145" width="180" height="130" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+    <text x="135" y="183" font-size="20" font-weight="700" fill="#1d4ed8">1. 需求提出</text><text x="135" y="220" font-size="14" fill="#374151">明确博客与平台</text><text x="135" y="245" font-size="14" fill="#374151">需要补充的内容</text>
+    <rect x="285" y="145" width="180" height="130" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+    <text x="375" y="183" font-size="20" font-weight="700" fill="#6d28d9">2. 代码阅读</text><text x="375" y="220" font-size="14" fill="#374151">分析前后端结构</text><text x="375" y="245" font-size="14" fill="#374151">确认真实数据流</text>
+    <rect x="525" y="145" width="180" height="130" rx="8" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/>
+    <text x="615" y="183" font-size="20" font-weight="700" fill="#c2410c">3. 问题定位</text><text x="615" y="220" font-size="14" fill="#374151">检查接口、数据库</text><text x="615" y="245" font-size="14" fill="#374151">与分析流程</text>
+    <rect x="765" y="145" width="180" height="130" rx="8" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+    <text x="855" y="183" font-size="20" font-weight="700" fill="#047857">4. 功能实现</text><text x="855" y="220" font-size="14" fill="#374151">修改代码与文档</text><text x="855" y="245" font-size="14" fill="#374151">补充图表与截图</text>
+    <rect x="1005" y="145" width="180" height="130" rx="8" fill="#f0fdfa" stroke="#0f766e" stroke-width="2"/>
+    <text x="1095" y="183" font-size="20" font-weight="700" fill="#0f766e">5. 测试验证</text><text x="1095" y="220" font-size="14" fill="#374151">运行单元测试</text><text x="1095" y="245" font-size="14" fill="#374151">检查页面与接口</text>
+    <rect x="1245" y="145" width="110" height="130" rx="8" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+    <text x="1300" y="183" font-size="18" font-weight="700" fill="#15803d">6. 交付</text><text x="1300" y="220" font-size="13" fill="#374151">部署</text><text x="1300" y="245" font-size="13" fill="#374151">复验</text>
+    <line x1="225" y1="210" x2="280" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/><line x1="465" y1="210" x2="520" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/><line x1="705" y1="210" x2="760" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/><line x1="945" y1="210" x2="1000" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/><line x1="1185" y1="210" x2="1240" y2="210" stroke="#4b5563" stroke-width="2" marker-end="url(#a)"/>
+  </g>
+  <path d="M1300 300 C1300 360 135 360 135 300" fill="none" stroke="#9ca3af" stroke-width="2" stroke-dasharray="8 6" marker-end="url(#a)"/>
+  <text x="700" y="350" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="15" fill="#6b7280">根据测试结果持续迭代</text>
+</svg>
