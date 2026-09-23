@@ -390,36 +390,148 @@ renderTopics();renderPapers();renderTrend();updateCount();
 })();
 </script>
 <script>
-/* Bonus features: annual evolution, learn-more page and analysis report export. */
 (function(){
-  const years=[2022,2023,2024,2025];
-  const fallback=["Vision-language","Diffusion models","3D Gaussian","Open vocabulary","Video understanding","Foundation model","Segmentation","NeRF","Self-supervised","Robot learning"];
-  function evolutionRows(year){
-    const topics=((window.visionpulseAnalytics||{}).topics||[]).map(x=>({label:x.label||x.terms&&x.terms[0]||"鐮旂┒鏂瑰悜",count:Number(x.paper_count||0)}));
-    const source=topics.length?topics:fallback.map((label,i)=>({label,count:92-i*6}));
-    const factor=(year-2021)/4;
-    return source.slice(0,10).map((x,i)=>({label:x.label,count:Math.max(1,Math.round(x.count*(0.65+factor*0.35)-i))}));
+  "use strict";
+  const years = [2022, 2023, 2024, 2025];
+  const fallbackWords = [
+    "Vision-language", "Diffusion models", "3D Gaussian",
+    "Open vocabulary", "Video understanding", "Foundation model",
+    "Segmentation", "NeRF", "Self-supervised", "Robot learning"
+  ];
+  const state = { records: [], timer: null, index: 0, live: false };
+  const byId = id => document.getElementById(id);
+  const text = value => String(value == null ? "" : value);
+  const esc = value => text(value).replace(/[&<>"']/g, ch => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[ch]));
+  function selectedVenue() {
+    const select = byId("evolutionConference");
+    const value = select ? text(select.value).trim() : "";
+    return value === "全部会议" || value === "All conferences" ? "" : value.toUpperCase();
   }
-  function renderEvolution(year){
-    const rows=evolutionRows(year), max=Math.max(1,...rows.map(x=>x.count));
-    const el=document.querySelector("#evolutionBars"); if(!el)return;
-    el.innerHTML=rows.map(x=>'<div class="bar"><span>'+escapeHtml(x.label)+'</span><div class="bar-track"><div class="bar-fill" style="width:'+Math.round(x.count/max*100)+'%"></div></div><b>'+x.count+'</b></div>').join("");
-    document.querySelector("#evolutionYear").textContent=String(year);
-    document.querySelector("#evolutionNotice").textContent="褰撳墠灞曠ず "+year+" 骞?Top 10 鐑瘝锛涙挱鏀惧皢鑷姩鍒囨崲骞村害銆?;
+  function rowsFor(year) {
+    const venue = selectedVenue();
+    const counts = new Map();
+    state.records.forEach(record => {
+      const recordYear = Number(record.year);
+      const recordVenue = text(record.venue).toUpperCase();
+      if (recordYear !== Number(year) || (venue && recordVenue !== venue)) return;
+      const keyword = text(record.keyword || record.label).trim();
+      const count = Number(record.paper_count || record.count || 0);
+      if (keyword && count > 0) counts.set(keyword, (counts.get(keyword) || 0) + count);
+    });
+    const rows = Array.from(counts, ([label, count]) => ({ label, count }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+      .slice(0, 10);
+    if (rows.length) return rows;
+    return fallbackWords.map((label, index) => ({
+      label,
+      count: Math.max(1, 92 - index * 6 + (Number(year) - 2022) * 4)
+    }));
   }
-  let evolutionTimer;
-  document.querySelector("#playEvolution")?.addEventListener("click",()=>{
-    let index=0; clearInterval(evolutionTimer); renderEvolution(years[index]);
-    evolutionTimer=setInterval(()=>{index+=1;if(index>=years.length){clearInterval(evolutionTimer);return;}renderEvolution(years[index]);},900);
+  function render(year) {
+    const bars = byId("evolutionBars");
+    if (!bars) return;
+    const rows = rowsFor(year);
+    const max = Math.max(1, ...rows.map(row => row.count));
+    bars.innerHTML = rows.map(row => {
+      const width = Math.max(6, Math.round(row.count / max * 100));
+      return '<div class="bar"><span>' + esc(row.label) +
+        '</span><div class="bar-track"><div class="bar-fill" style="width:' +
+        width + '%"></div></div><b>' + row.count + '</b></div>';
+    }).join("");
+    const yearEl = byId("evolutionYear");
+    if (yearEl) yearEl.textContent = text(year);
+    const notice = byId("evolutionNotice");
+    if (notice) {
+      const mode = state.live ? "实时数据" : "演示数据";
+      const venue = selectedVenue() || "全部会议";
+      notice.textContent = venue + " · " + year + " 年 Top 10 热词（" + mode + "）";
+    }
+  }
+  function currentYear() {
+    const value = Number(byId("evolutionYear") && byId("evolutionYear").textContent);
+    return years.includes(value) ? value : years[0];
+  }
+  function play() {
+    const button = byId("playEvolution");
+    clearInterval(state.timer);
+    state.index = 0;
+    render(years[state.index]);
+    if (button) button.textContent = "播放中";
+    state.timer = setInterval(() => {
+      state.index += 1;
+      if (state.index >= years.length) {
+        clearInterval(state.timer);
+        state.timer = null;
+        if (button) button.textContent = "播放年度演变";
+        return;
+      }
+      render(years[state.index]);
+    }, 900);
+  }
+  async function loadTrendData() {
+    const notice = byId("evolutionNotice");
+    try {
+      const base = window.VISIONPULSE_API_BASE || "";
+      const url = base + "/api/analytics/trends?evolution=" + Date.now();
+      const response = await fetch(url, {
+        headers: { Accept: "application/json" },
+        cache: "no-store"
+      });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+      const payload = await response.json();
+      state.records = payload && Array.isArray(payload.records) ? payload.records : [];
+      state.live = state.records.length > 0;
+    } catch (error) {
+      state.records = [];
+      state.live = false;
+      if (notice) notice.textContent = "趋势接口暂时不可用，当前显示演示数据";
+    }
+    render(currentYear());
+  }
+  const playButton = byId("playEvolution");
+  if (playButton) playButton.addEventListener("click", play);
+  const conference = byId("evolutionConference");
+  if (conference) conference.addEventListener("change", () => render(currentYear()));
+  render(years[0]);
+  loadTrendData();
+
+  function reportPayload() {
+    const analytics = window.visionpulseAnalytics || {};
+    return {
+      generated_at: new Date().toISOString(),
+      paper_count: Number(analytics.paper_count || 0),
+      cluster_count: Number(analytics.cluster_count || 0),
+      keywords: analytics.keywords || [],
+      topics: analytics.topics || [],
+      trends: window.visionpulseTrendData || { years: [], venues: [], records: state.records },
+      method: { vectorizer: "TF-IDF", clusterer: "K-Means", conferences: ["CVPR", "ICCV", "ECCV"] }
+    };
+  }
+  function refreshReport() {
+    const payload = reportPayload();
+    const papers = byId("reportPaperCount");
+    const keywords = byId("reportKeywordCount");
+    const status = byId("reportStatus");
+    if (papers) papers.textContent = text(payload.paper_count);
+    if (keywords) keywords.textContent = text(payload.keywords.length);
+    if (status) status.textContent = "分析快照已生成：" + new Date(payload.generated_at).toLocaleString("zh-CN");
+  }
+  const refresh = byId("refreshReport");
+  if (refresh) refresh.addEventListener("click", refreshReport);
+  const download = byId("downloadReport");
+  if (download) download.addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(reportPayload(), null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "visionpulse-analysis-report.json";
+    link.click();
+    URL.revokeObjectURL(link.href);
   });
-  document.querySelector("#evolutionConference")?.addEventListener("change",()=>renderEvolution(Number(document.querySelector("#evolutionYear").textContent)||2022));
-  renderEvolution(2022);
-  function reportPayload(){return {generated_at:new Date().toISOString(),paper_count:Number((window.visionpulseAnalytics||{}).paper_count||0),cluster_count:Number((window.visionpulseAnalytics||{}).cluster_count||0),keywords:((window.visionpulseAnalytics||{}).keywords||[]),topics:((window.visionpulseAnalytics||{}).topics||[]),trends:window.visionpulseTrendData||{years:[],venues:[],records:[]},method:{vectorizer:"TF-IDF",clusterer:"K-Means",conferences:["CVPR","ICCV","ECCV"]}};}
-  function refreshReport(){const p=reportPayload();document.querySelector("#reportPaperCount").textContent=p.paper_count;document.querySelector("#reportKeywordCount").textContent=p.keywords.length;document.querySelector("#reportStatus").textContent="鍒嗘瀽蹇収宸茬敓鎴愶細"+new Date(p.generated_at).toLocaleString("zh-CN");}
-  document.querySelector("#refreshReport")?.addEventListener("click",()=>{refreshReport();toast("鍒嗘瀽鐘舵€佸凡鍒锋柊")});
-  document.querySelector("#downloadReport")?.addEventListener("click",()=>{const blob=new Blob([JSON.stringify(reportPayload(),null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="visionpulse-analysis-report.json";a.click();URL.revokeObjectURL(a.href);toast("鍒嗘瀽鎶ュ憡宸蹭笅杞?)});
   refreshReport();
 })();
-</script></body>
+</script>
+</body>
 </html>
 
