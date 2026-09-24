@@ -95,7 +95,7 @@ def build_index() -> dict[tuple[str, int], str]:
                 parser.feed(fetch_text(base))
                 for title, href in parser.links:
                     if href.endswith("_paper.html"):
-                        index[(normalize(title), year)] = urllib.parse.urljoin(base, href)
+                        index[normalize(title)] = urllib.parse.urljoin(base, href)
             except Exception as exc:
                 print(f"CVF {venue}{year} failed: {exc}")
             time.sleep(1)
@@ -107,7 +107,7 @@ def build_index() -> dict[tuple[str, int], str]:
         for title, href in parser.links:
             match = re.search(r"papers/eccv_(2022|2024)/.*_paper\.php", href, re.I)
             if match:
-                index[(normalize(title), int(match.group(1)))] = urllib.parse.urljoin(base, href)
+                index[normalize(title)] = urllib.parse.urljoin(base, href)
     except Exception as exc:
         print(f"ECVA failed: {exc}")
     return index
@@ -127,7 +127,7 @@ def openalex_abstract(title: str, year: int | None, doi: str | None) -> str | No
     for work in payload.get("results", []):
         score = difflib.SequenceMatcher(None, normalize(title), normalize(work.get("title"))).ratio()
         work_doi = (work.get("doi") or "").removeprefix("https://doi.org/").casefold()
-        if score < 0.92 or (year and work.get("publication_year") != year):
+        if score < 0.92:
             continue
         if wanted_doi and work_doi and wanted_doi != work_doi:
             continue
@@ -154,7 +154,7 @@ def refresh_missing(db_path: Path | str, limit: int = 10) -> dict[str, int]:
         for row in rows:
             try:
                 abstract = None
-                key = (normalize(row["title"]), int(row["year"])) if row["year"] else None
+                key = normalize(row["title"])
                 if key and key in index:
                     parser = AbstractParser()
                     parser.feed(fetch_text(index[key]))
@@ -177,3 +177,4 @@ def refresh_missing(db_path: Path | str, limit: int = 10) -> dict[str, int]:
 if __name__ == "__main__":
     path = Path(os.getenv("VISIONPULSE_DB", "data/visionpulse.sqlite3"))
     print(refresh_missing(path, int(os.getenv("ABSTRACT_REFRESH_LIMIT", "10"))))
+
