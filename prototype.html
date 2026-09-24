@@ -139,14 +139,21 @@ renderTopics();renderPapers();renderTrend();updateCount();
     return Array.isArray(value) ? value.join(", ") : String(value || "");
   }
 
-  function normalizePaper(row) {
+  const DEMO_ABSTRACTS = {
+    "flowedit inversion free text based editing using pre trained flow models": "We introduce FlowEdit, an inversion-free, optimization-free and model-agnostic method for text-based editing with pretrained text-to-image flow models. It directly maps source and target image distributions with an ODE, reducing transport cost and improving structure preservation on Stable Diffusion 3 and FLUX.",
+    "generating physically stable and buildable brick structures from text": "We present a text-driven method for generating physically stable and buildable brick structures. The approach combines generative modeling with geometric and physical constraints so that language-guided designs can be assembled into feasible structures."
+  };
+
+  function demoAbstract(title) {
+    return DEMO_ABSTRACTS[String(title || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()] || "";
+  }`r`n  function normalizePaper(row) {
     return {
       id: String(row.id ?? row.dblp_key ?? ""),
       title: row.title || "未命名论文",
       conf: row.venue || row.conf || "未知会议",
       year: String(row.year || ""),
       keywords: textOf(row.keywords || "待补充"),
-      abstract: row.abstract || "",
+      abstract: row.abstract || demoAbstract(row.title),
       link: row.dblp_url || row.url || ""
     };
   }
@@ -318,7 +325,7 @@ renderTopics();renderPapers();renderTrend();updateCount();
       conf: row.venue || row.conf || "未知会议",
       year: String(row.year || ""),
       keywords: Array.isArray(row.keywords) ? row.keywords.join(", ") : String(row.keywords || "待补充"),
-      abstract: row.abstract || "",
+      abstract: row.abstract || demoAbstract(row.title),
       link: row.dblp_url || row.url || ""
     };
   }
@@ -420,4 +427,5 @@ renderTopics();renderPapers();renderTrend();updateCount();
 })();
 </script></body>
 </html>
+
 
