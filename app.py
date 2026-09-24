@@ -7,15 +7,41 @@ import argparse
 import hmac
 import json
 import os
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from src.hybrid_service import HybridPaperService
 from src.storage import PaperStore
+from scripts.venue_abstract_fetch import refresh_missing
 
 
 ROOT = Path(__file__).resolve().parent
+_abstract_refresh_lock = threading.Lock()
+_abstract_refresh_started = False
+
+
+def start_abstract_refresh(store: PaperStore) -> None:
+    global _abstract_refresh_started
+    if os.getenv("AUTO_ABSTRACT_REFRESH", "1") != "1":
+        return
+    with _abstract_refresh_lock:
+        if _abstract_refresh_started:
+            return
+        _abstract_refresh_started = True
+
+    def worker() -> None:
+        try:
+            limit = max(1, int(os.getenv("ABSTRACT_REFRESH_LIMIT", "10")))
+            result = refresh_missing(store.path, limit=limit)
+            store.refresh_analysis()
+            print(f"Automatic abstract refresh finished: {result}")
+        except Exception as exc:
+            print(f"Automatic abstract refresh failed: {exc}")
+
+    threading.Thread(target=worker, name="abstract-refresh", daemon=True).start()
+
 
 
 def parse_limit(raw_value: str, default: int = 50, maximum: int = 100) -> int:
@@ -92,6 +118,7 @@ class ApiHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/analytics/summary":
             try:
+                start_abstract_refresh(self.service.store)
                 self._send_json(self.service.store.analysis_summary())
             except Exception as exc:  # keep the frontend diagnostic instead of a dropped proxy connection
                 self._send_json({"error": "analysis unavailable", "detail": str(exc)}, status=500)
